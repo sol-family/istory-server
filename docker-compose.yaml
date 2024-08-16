@@ -1,0 +1,18 @@
+version: "3"
+services:
+  db:
+    image: mysql:8.0.26
+    restart: always
+    command:
+      - --lower_case_table_names=1
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    container_name: istory
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=istory
+      - MYSQL_ROOT_PASSWORD=ssafy1234!!
+      - TZ=Asia/Seoul
+    volumes:
+      - C:\istory:/var/lib/mysql
