@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService{
         return entity.isPresent();
     }
 
-    public String userInvite(String familyKey, HttpServletRequest request) {
+    public void userInvite(String familyKey, HttpServletRequest request) {
 
         // 세션 객체 생성
         HttpSession session =request.getSession();

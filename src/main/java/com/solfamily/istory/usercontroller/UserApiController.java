@@ -1,4 +1,4 @@
-package com.solfamily.istory.userontroller;
+package com.solfamily.istory.usercontroller;
 
 import com.solfamily.istory.usermodel.UserDto;
 import com.solfamily.istory.usermodel.UserEntity;
