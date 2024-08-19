@@ -19,4 +19,5 @@ public class UserDto {
     private String userBirth;
     private String userType;
     private String userProfile;
+    private String familyKey;
 }
