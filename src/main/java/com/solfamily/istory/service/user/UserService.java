@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -91,16 +94,31 @@ public class UserService {
             // DB 내부에 저장된 해싱된 비밀번호와 원본 비밀번호 비교
             if(passwordEncoder.matches(pw, entity.getUserPw())) {
 
-                // 사용자 정보를 세션에 저장
-                session.setAttribute("user", userConverter.toDto(entity));
+//                // 사용자 정보를 세션에 저장
+//                session.setAttribute("user", userConverter.toDto(entity));
+//
+//                // 세션 유효 시간 설정 (30분)
+//                session.setMaxInactiveInterval(30 * 60);
 
-                // 세션 유효 시간 설정 (30분)
-                session.setMaxInactiveInterval(30 * 60);
+                // JWT 토큰 발급
+                Map<String, Object> claims = new HashMap<>();
+                claims.put("userId", entity.getUserId()); // 사용자 ID만 담기
 
-                // 상태코드와 유저정보가 담인 UserDto 반환
+                LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30); // 토큰 만료 시간 설정 (30분)
+                String jwtToken = JwtTokenService.create(claims, expiredAt); // 토큰 생성
+
+                // 응답 구성
+                Map<String, Object> response = new HashMap<>();
+                response.put("jwtToken", jwtToken);
+
+                // 사용자 정보는 별도로 제공
+                UserDto userDto = userConverter.toDto(entity);
+                response.put("userDto", userDto);
+
+                // 상태코드와 JWT Token, 유저정보가 담긴 Response 반환
                 return ResponseEntity
                         .status(HttpStatus.OK)
-                        .body(userConverter.toDto(entity));
+                        .body(response);
             } else { // 비밀번호가 일치하지 않으면
                 return ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)

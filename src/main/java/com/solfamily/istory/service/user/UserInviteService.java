@@ -8,6 +8,8 @@ import com.solfamily.istory.model.user.UserInviteEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class UserInviteService {
     private final UserConverter userConverter;
 
     // 초대코드로 회원가입
-    public UserDto userJoinByInvite(
+    public ResponseEntity userJoinByInvite(
             UserEntity userEntity,
             HttpServletRequest request
     ) {
@@ -36,16 +38,20 @@ public class UserInviteService {
 
         // 유효하지 않은 초대코드라면
         if(OptionalUserInviteEntity.isEmpty()) {
-            throw new RuntimeException("Not Exist InviteCode");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .body("Invalid InviteCode : 유효하지 않은 초대코드입니다.");
         }
 
+        // DB에서 초대코드에 저장된 패밀키 받아와서 저장
         String familyKey = OptionalUserInviteEntity.get().getFamilyKey();
-
         userEntity.setFamilyKey(familyKey);
 
         var entity = userRepository.save(userEntity);
 
-        return userConverter.toDto(entity);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userConverter.toDto(entity));
     }
 
     // 초대코드 발급

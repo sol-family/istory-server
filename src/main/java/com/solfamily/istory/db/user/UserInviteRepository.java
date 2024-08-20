@@ -18,6 +18,7 @@ public interface UserInviteRepository extends JpaRepository<UserInviteEntity, St
     );
 
     // 생성된지 30분이 지난 초대코드를 사용된 초대코드로 변경
+    // redis로 변경예정
     @Modifying
     @Query(value = "UPDATE istory_user_invite u " +
             "SET u.is_used = true " +
@@ -28,6 +29,7 @@ public interface UserInviteRepository extends JpaRepository<UserInviteEntity, St
     void checkExpiredInvitesAsUsed(@Param("now") LocalDateTime now); // 정적으로 할당
 
     // 사용된 초대코드를 30분 주기로 자동 삭제
+    // redis로 변경예정
     @Modifying
     void deleteByisUsedTrue();
 }
