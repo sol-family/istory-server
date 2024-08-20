@@ -1,12 +1,15 @@
 package com.solfamily.istory.controller.user;
 
+import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
 import com.solfamily.istory.service.user.UserInviteService;
 import com.solfamily.istory.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,6 +72,16 @@ public class UserApiController {
             String familyKey
     ) {
         return userInviteService.userInvite(familyKey);
+    }
+
+    // 유저 로그인
+    @PostMapping("/user/login")
+    public ResponseEntity<> userLogin(
+        @RequestBody
+        LoginRequest loginRequest,
+        HttpSession httpsession
+    ) {
+        return userService.userLogin(loginRequest, httpsession);
     }
 
 }
