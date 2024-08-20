@@ -11,3 +11,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: ssafy1234!!
+  mvc:
+    servlet:
+      path: /api/v1
