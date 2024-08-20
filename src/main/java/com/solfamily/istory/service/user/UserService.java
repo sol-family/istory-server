@@ -109,11 +109,11 @@ public class UserService {
 
                 // 응답 구성
                 Map<String, Object> response = new HashMap<>();
-                response.put("jwtToken", jwtToken);
+                response.put("jwtToken", jwtToken); // 응답에 jwtToken 저장
 
                 // 사용자 정보는 별도로 제공
                 UserDto userDto = userConverter.toDto(entity);
-                response.put("userDto", userDto);
+                response.put("userDto", userDto); // 응답에 userDto 저장
 
                 // 상태코드와 JWT Token, 유저정보가 담긴 Response 반환
                 return ResponseEntity

@@ -52,13 +52,12 @@ import java.util.Map;
                 });
             } catch (Exception e) {
                 if (e instanceof SignatureException) {
-
+                    // 예외처리를 작성하세요
                 }
-
                 if (e instanceof ExpiredJwtException) {
-
+                    // 예외처리를 작성하세요
                 } else {
-
+                    // 예외처리를 작성하세요
                 }
             }
         }
