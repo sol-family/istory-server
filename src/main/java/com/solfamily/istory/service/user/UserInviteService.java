@@ -45,9 +45,10 @@ public class UserInviteService {
 
         var entity = userRepository.save(userEntity);
 
-        return userConverter.toDto(userEntity);
+        return userConverter.toDto(entity);
     }
 
+    // 초대코드 발급
     public String userInvite(String familyKey) {
         // 랜덤한 초대코드 생성
         String inviteCode = UUID.randomUUID().toString();

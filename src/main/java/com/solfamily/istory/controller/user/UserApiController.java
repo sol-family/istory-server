@@ -44,6 +44,7 @@ public class UserApiController {
         return userService.getAlluser();
     }
 
+    // 단일 유저 조회
     @GetMapping("user/userId/{userId}")
     public UserDto getUser(
             @PathVariable
@@ -61,6 +62,7 @@ public class UserApiController {
         return userService.checkId(userId);
     }
 
+    // 초대코드 발급
     @PostMapping("user/invite")
     public String userInvite(
             @RequestParam(name = "family_key")
