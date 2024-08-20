@@ -1,8 +1,7 @@
-package com.solfamily.istory.service;
+package com.solfamily.istory.service.user;
 
-import com.solfamily.istory.db.UserRepository;
-import com.solfamily.istory.model.UserEntity;
-import org.apache.catalina.User;
+import com.solfamily.istory.db.user.UserRepository;
+import com.solfamily.istory.model.user.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

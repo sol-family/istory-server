@@ -1,6 +1,6 @@
-package com.solfamily.istory.db;
+package com.solfamily.istory.db.user;
 
-import com.solfamily.istory.model.UserEntity;
+import com.solfamily.istory.model.user.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 // 아래는 제네릭 안에 들어가는 값에 대한 설명

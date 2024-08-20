@@ -1,4 +1,4 @@
-package com.solfamily.istory.model;
+package com.solfamily.istory.model.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

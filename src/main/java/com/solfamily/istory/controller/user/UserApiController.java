@@ -1,9 +1,8 @@
-package com.solfamily.istory.controller;
+package com.solfamily.istory.controller.user;
 
-import com.solfamily.istory.model.UserEntity;
-import com.solfamily.istory.service.UserService;
+import com.solfamily.istory.model.user.UserEntity;
+import com.solfamily.istory.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
