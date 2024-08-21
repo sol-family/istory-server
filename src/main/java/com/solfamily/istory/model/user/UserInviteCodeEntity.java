@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Entity(name = "userInvite")
 @Table(name = "istory_user_invite")
-public class UserInviteEntity {
+public class UserInviteCodeEntity {
 
     @Id
     private String inviteCode;
