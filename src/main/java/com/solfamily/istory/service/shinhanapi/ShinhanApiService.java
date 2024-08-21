@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ShinhanApiService {
-    private static String apiKey = "2f512367df5a448ebda0aa264aeba0da";
+    private static String apiKey = "";
 
     // 사용자 계정 생성 API
     public Map<String, Object> userJoin(
@@ -58,7 +58,7 @@ public class ShinhanApiService {
     }
 }
 
-// 아래는 API키 발급 코드
+//    public static void main(String[] args) {
 //        HttpClient client = HttpClient.newHttpClient();
 //
 //        String managerId = "pkb1998@naver.com";
@@ -66,7 +66,7 @@ public class ShinhanApiService {
 //        String jsonInputString = "{\"managerId\": \"" + managerId + "\"}";
 //
 //        HttpRequest request = HttpRequest.newBuilder()
-//                .uri(URI.create("https://finopenapi.ssafy.io/ssafy/api/v1/edu/app/IssuedApiKey")) // 요청을 보낼 URL
+//                .uri(URI.create("https://finopenapi.ssafy.io/ssafy/api/v1/edu/app/reIssuedApiKey")) // 요청을 보낼 URL
 //                .header("Content-Type", "application/json")
 //                .POST(HttpRequest.BodyPublishers.ofString(jsonInputString))
 //                .build();
@@ -84,3 +84,5 @@ public class ShinhanApiService {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+//    }
+//}

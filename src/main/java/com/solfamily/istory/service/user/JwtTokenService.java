@@ -17,7 +17,7 @@ import java.util.Map;
     @Service
     public class JwtTokenService {
 
-        private static String secretKey = "JWTTokenForShinhanHakertonXSsafy";
+        private static String secretKey = "";
 
         // 토큰 발행
         public static String create(
