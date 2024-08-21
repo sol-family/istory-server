@@ -1,7 +1,6 @@
 package com.solfamily.istory.controller.user;
 
 import com.solfamily.istory.model.user.LoginRequest;
-import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
 import com.solfamily.istory.service.user.UserInviteService;
 import com.solfamily.istory.service.user.UserService;
@@ -11,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @SpringBootApplication
 @RestController
@@ -24,7 +21,7 @@ public class UserApiController {
 
     // 초대코드없이 회원가입
     @PostMapping("user/join")
-    public UserDto userJoin(
+    public ResponseEntity userJoin(
             @RequestBody
             UserEntity userEntity
     ) {
@@ -33,7 +30,7 @@ public class UserApiController {
 
     // 초대코드로 회원가입
     @PostMapping("user/joinByInvite")
-    public UserDto userJoinByInvite(
+    public ResponseEntity userJoinByInvite(
             @RequestBody
             UserEntity userEntity,
             HttpServletRequest request
@@ -43,13 +40,13 @@ public class UserApiController {
 
     // 모든 유저 조회
     @GetMapping ("user/all")
-    public List<UserDto> getAllUser() {
+    public ResponseEntity getAllUser() {
         return userService.getAlluser();
     }
 
     // 단일 유저 조회
     @GetMapping("user/userId/{userId}")
-    public UserDto getUser(
+    public ResponseEntity getUser(
             @PathVariable
             String userId
     ) {
@@ -76,7 +73,7 @@ public class UserApiController {
 
     // 유저 로그인
     @PostMapping("/user/login")
-    public ResponseEntity<> userLogin(
+    public ResponseEntity userLogin(
         @RequestBody
         LoginRequest loginRequest,
         HttpSession httpsession

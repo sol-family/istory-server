@@ -87,5 +87,4 @@ public class UserInviteService {
     public void deleteInviteCode() {
         userInviteRepository.deleteByisUsedTrue();
     }
-
 }

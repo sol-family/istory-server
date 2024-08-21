@@ -4,23 +4,16 @@ import com.solfamily.istory.db.user.UserRepository;
 import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.solfamily.istory.service.shinhanapi.ShinhanAPI;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,37 +24,75 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    private final PasswordService passwordService;
+    private final ShinhanAPI shinhanAPI;
 
     // 초대코드 없이 회원가입
-    public UserDto userJoin(UserEntity userEntity) {
+    public ResponseEntity userJoin(
+            UserEntity userEntity
+    ) {
+        String userId = userEntity.getUserId();
+        String userPw = userEntity.getUserPw();
+
+        // 유저 비밀번호 암호화
+        var hashedUserPw = passwordService.hashPassword(userPw);
+        userEntity.setUserPw(hashedUserPw); // 암호화된 비밀번호로 재저장
+
         // 고유한 패밀리키(식별키) 생성
         String familyKey = "familyKey/" + UUID.randomUUID().toString();
         userEntity.setFamilyKey(familyKey);
 
+        // 신한 API 연동(사용자 계정 생성)
+        Map<String, Object> userInfo  = shinhanAPI.userJoin(userId);
+
+        if(userInfo == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .body("There is some Error about API : 신한 API와의 연동과정에서 문제가 발생했습니다.");
+        }
+
+        // 신한 API에서 받아온 사용자키 userEntity에 저장
+        var userKey = userInfo.get("userKey");
+        userEntity.setUserKey(userKey.toString());
+
         var entity = userRepository.save(userEntity);
 
-        return userConverter.toDto(userEntity);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userConverter.toDto(entity));
     }
 
     // 유저 한 명 유저 아이디로 조회
-    public UserDto getUser(String userId) {
+    public ResponseEntity getUser(String userId) {
         var optionalUserEntity = userRepository.findById(userId);
 
         if(optionalUserEntity.isEmpty()) {
-            throw new RuntimeException("userId Not Found");
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Not Exist User : 존재하지 않는 회원입니다.");
         }
 
-        return userConverter.toDto(optionalUserEntity.get());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userConverter.toDto(optionalUserEntity.get()));
     }
 
     // 모든 유저 조회
-    public List<UserDto> getAlluser() {
-        var userEntities = userRepository.findAll();
+    public ResponseEntity getAlluser() {
+        var optionalUserEntities = userRepository.findAll();
 
-        return userEntities.stream().map(userConverter::toDto).toList();
+        if(optionalUserEntities.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Not Exist Users : 존재하는 회원이 없습니다.");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(optionalUserEntities.stream().map(userConverter::toDto).toList());
     }
 
-    // 유저 아이디 중북체크
+    // 유저 아이디 중복체크
     public boolean checkId(String userId) {
         var entity = userRepository.findById(userId);
 
@@ -70,15 +101,15 @@ public class UserService {
     }
 
     // 유저 로그인
-    public ResponseEntity<> userLogin(
+    public ResponseEntity userLogin(
             LoginRequest loginRequest,
             HttpSession session
     ) {
 
-        var id = loginRequest.getUserId();
-        var pw = loginRequest.getUserPw();
+        var userId = loginRequest.getUserId();
+        var userPw = loginRequest.getUserPw();
 
-        var optionalEntity = userRepository.findById(id);
+        var optionalEntity = userRepository.findById(userId);
 
         // id가 없으면
         if(optionalEntity.isEmpty()) {
@@ -88,11 +119,8 @@ public class UserService {
         } else { // id가 있으면
             UserEntity entity = optionalEntity.get();
 
-            // 원본 비밀번호 DB 비밀번호를 비교하기 위한
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
             // DB 내부에 저장된 해싱된 비밀번호와 원본 비밀번호 비교
-            if(passwordEncoder.matches(pw, entity.getUserPw())) {
+            if(passwordService.checkPassword(userPw, entity.getUserPw())) {
 
 //                // 사용자 정보를 세션에 저장
 //                session.setAttribute("user", userConverter.toDto(entity));
@@ -102,7 +130,7 @@ public class UserService {
 
                 // JWT 토큰 발급
                 Map<String, Object> claims = new HashMap<>();
-                claims.put("userId", entity.getUserId()); // 사용자 ID만 담기
+                claims.put("userId", entity.getUserId()); // 사용자 ID만 claims에 담음
 
                 LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30); // 토큰 만료 시간 설정 (30분)
                 String jwtToken = JwtTokenService.create(claims, expiredAt); // 토큰 생성
