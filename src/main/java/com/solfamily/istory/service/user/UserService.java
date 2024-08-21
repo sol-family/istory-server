@@ -1,11 +1,12 @@
 package com.solfamily.istory.service.user;
 
 import com.solfamily.istory.db.user.UserRepository;
+import com.solfamily.istory.global.JwtTokenService;
+import com.solfamily.istory.global.PasswordService;
 import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
-import com.solfamily.istory.service.shinhanapi.ShinhanApiService;
-import jakarta.servlet.http.HttpSession;
+import com.solfamily.istory.global.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
