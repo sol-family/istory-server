@@ -4,28 +4,29 @@ import com.solfamily.istory.db.user.UserRepository;
 import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
-import com.solfamily.istory.service.shinhanapi.ShinhanAPI;
+import com.solfamily.istory.service.shinhanapi.ShinhanApiService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @EnableScheduling
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserConverter userConverter;
+    private final UserConverterService userConverterService;
     private final PasswordService passwordService;
-    private final ShinhanAPI shinhanAPI;
+    private final ShinhanApiService shinhanApiService;
 
     // 초대코드 없이 회원가입
     public ResponseEntity userJoin(
@@ -43,23 +44,24 @@ public class UserService {
         userEntity.setFamilyKey(familyKey);
 
         // 신한 API 연동(사용자 계정 생성)
-        Map<String, Object> userInfo  = shinhanAPI.userJoin(userId);
+        Map<String, Object> userInfo  = shinhanApiService.userJoin(userId);
 
-        if(userInfo == null) {
+        if(userInfo.get("userKey").equals("")) {
             return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
-                    .body("There is some Error about API : 신한 API와의 연동과정에서 문제가 발생했습니다.");
+                    .body("There is some error about API : 신한 API와의 연동과정에서 문제가 발생했습니다.");
         }
 
         // 신한 API에서 받아온 사용자키 userEntity에 저장
         var userKey = userInfo.get("userKey");
+        log.info("userKey : {}", userKey);
         userEntity.setUserKey(userKey.toString());
 
         var entity = userRepository.save(userEntity);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userConverter.toDto(entity));
+                .body(userConverterService.toDto(entity));
     }
 
     // 유저 한 명 유저 아이디로 조회
@@ -74,7 +76,7 @@ public class UserService {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userConverter.toDto(optionalUserEntity.get()));
+                .body(userConverterService.toDto(optionalUserEntity.get()));
     }
 
     // 모든 유저 조회
@@ -89,7 +91,7 @@ public class UserService {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(optionalUserEntities.stream().map(userConverter::toDto).toList());
+                .body(optionalUserEntities.stream().map(userConverterService::toDto).toList());
     }
 
     // 유저 아이디 중복체크
@@ -140,7 +142,7 @@ public class UserService {
                 response.put("jwtToken", jwtToken); // 응답에 jwtToken 저장
 
                 // 사용자 정보는 별도로 제공
-                UserDto userDto = userConverter.toDto(entity);
+                UserDto userDto = userConverterService.toDto(entity);
                 response.put("userDto", userDto); // 응답에 userDto 저장
 
                 // 상태코드와 JWT Token, 유저정보가 담긴 Response 반환
@@ -153,5 +155,12 @@ public class UserService {
                         .body("Invalid Password : 비밀번호가 일치하지 않습니다.");
             }
         }
+    }
+
+    // 유저Key 조회
+    public String getUserKey(
+            String userId
+    ) {
+        return userRepository.findUserKeyByUserId(userId);
     }
 }

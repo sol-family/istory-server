@@ -2,7 +2,6 @@ package com.solfamily.istory.service.user;
 
 import com.solfamily.istory.db.user.UserInviteRepository;
 import com.solfamily.istory.db.user.UserRepository;
-import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
 import com.solfamily.istory.model.user.UserInviteEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,7 @@ public class UserInviteService {
 
     private final UserRepository userRepository;
     private final UserInviteRepository userInviteRepository;
-    private final UserConverter userConverter;
+    private final UserConverterService userConverterService;
 
     // 초대코드로 회원가입
     public ResponseEntity userJoinByInvite(
@@ -51,7 +50,7 @@ public class UserInviteService {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userConverter.toDto(entity));
+                .body(userConverterService.toDto(entity));
     }
 
     // 초대코드 발급

@@ -2,6 +2,8 @@ package com.solfamily.istory.service.shinhanapi;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,7 +12,9 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ShinhanAPI {
+@Slf4j
+@Service
+public class ShinhanApiService {
     private static String apiKey = "2f512367df5a448ebda0aa264aeba0da";
 
     // 사용자 계정 생성 API
@@ -19,12 +23,14 @@ public class ShinhanAPI {
     ) {
         Map<String, Object> userInfo = new HashMap<>();
 
+//        log.info("userId : {}" , userId);
+
         HttpClient client = HttpClient.newHttpClient();
 
         // JSON 데이터
         String jsonInputString = "{" +
-                "\"apiKey\": \"" + apiKey + "\"," +
-                "\"userId\": \"" + userId + "\" " +
+                "\"apiKey\":\"" + apiKey + "\"," +
+                "\"userId\":\"" + userId + "\" " +
                 "}";
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -35,10 +41,14 @@ public class ShinhanAPI {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+//            System.out.println("Response Code: " + response.statusCode());
+//            System.out.println("Response Body: " + response.body());
+
             // JSON 파싱
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.body());
             String userKey = rootNode.path("userKey").asText(); // userKey 추출
+//            log.info("userKey : {}" , userKey);
             userInfo.put("userKey", userKey);
 
             return userInfo;

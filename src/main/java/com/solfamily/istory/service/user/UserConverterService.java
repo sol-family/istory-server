@@ -5,7 +5,7 @@ import com.solfamily.istory.model.user.UserEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserConverter {
+public class UserConverterService {
 
     public UserDto toDto(UserEntity userEntity) {
 
