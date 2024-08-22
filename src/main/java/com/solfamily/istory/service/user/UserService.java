@@ -1,6 +1,7 @@
 package com.solfamily.istory.service.user;
 
 import com.solfamily.istory.db.user.UserRepository;
+import com.solfamily.istory.global.JsonParser;
 import com.solfamily.istory.global.JwtTokenService;
 import com.solfamily.istory.global.PasswordService;
 import com.solfamily.istory.model.user.LoginRequest;
@@ -28,6 +29,7 @@ public class UserService {
     private final UserConverterService userConverterService;
     private final PasswordService passwordService;
     private final ShinhanApiService shinhanApiService;
+    private final JsonParser jsonParser;
 
     // 초대코드 없이 회원가입
     public ResponseEntity userJoin(
@@ -48,9 +50,11 @@ public class UserService {
         Map<String, Object> userInfo  = shinhanApiService.userJoin(userId);
 
         if(userInfo.get("userKey").equals("")) {
+            String msg = "There is some error about API : 신한 API와의 연동과정에서 문제가 발생했습니다.";
+            String json = jsonParser.toJson(msg);
             return ResponseEntity
-                    .status(HttpStatus.BAD_GATEWAY)
-                    .body("There is some error about API : 신한 API와의 연동과정에서 문제가 발생했습니다.");
+                    .status(HttpStatus.BAD_REQUEST) // 400 error
+                    .body(json);
         }
 
         // 신한 API에서 받아온 사용자키 userEntity에 저장
@@ -70,9 +74,11 @@ public class UserService {
         var optionalUserEntity = userRepository.findById(userId);
 
         if(optionalUserEntity.isEmpty()) {
+            String msg = "Not Exist User : 존재하지 않는 회원입니다.";
+            String json = jsonParser.toJson(msg);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Not Exist User : 존재하지 않는 회원입니다.");
+                    .body(json);
         }
 
         var entity = optionalUserEntity.get();
