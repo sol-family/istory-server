@@ -1,7 +1,6 @@
-package com.solfamily.istory.db;
+package com.solfamily.istory.mission.db;
 
-import com.solfamily.istory.model.entity.FamilyMissionEntity;
-import com.solfamily.istory.model.entity.MissionImgEntity;
+import com.solfamily.istory.mission.model.entity.MissionImgEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MissionImgRepository extends JpaRepository<MissionImgEntity, String> {

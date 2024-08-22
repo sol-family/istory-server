@@ -1,4 +1,4 @@
-package com.solfamily.istory.model.entity.id;
+package com.solfamily.istory.mission.model.entity.id;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

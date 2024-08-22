@@ -1,6 +1,6 @@
-package com.solfamily.istory.model.entity;
+package com.solfamily.istory.mission.model.entity;
 
-import com.solfamily.istory.model.entity.id.ReportEntityId;
+import com.solfamily.istory.mission.model.entity.id.ReportEntityId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

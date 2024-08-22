@@ -1,4 +1,4 @@
-package com.solfamily.istory.model.entity;
+package com.solfamily.istory.mission.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

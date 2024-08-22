@@ -1,6 +1,6 @@
-package com.solfamily.istory.db;
+package com.solfamily.istory.mission.db;
 
-import com.solfamily.istory.model.entity.MissionEntity;
+import com.solfamily.istory.mission.model.entity.MissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
