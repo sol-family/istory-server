@@ -3,6 +3,7 @@ package com.solfamily.istory.global;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -15,7 +16,8 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ShinhanApiService {
-    private static String apiKey = "816441c46c2d4923bbfdd8c561b52131";
+    @Value("${SHINHAN_API_KEY}")
+    private static String apiKey;
 
     // 사용자 계정 생성 API
     public Map<String, Object> userJoin(
