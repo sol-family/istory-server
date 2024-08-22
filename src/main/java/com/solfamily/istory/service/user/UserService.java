@@ -1,11 +1,12 @@
 package com.solfamily.istory.service.user;
 
 import com.solfamily.istory.db.user.UserRepository;
+import com.solfamily.istory.global.JwtTokenService;
+import com.solfamily.istory.global.PasswordService;
 import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserDto;
 import com.solfamily.istory.model.user.UserEntity;
-import com.solfamily.istory.service.shinhanapi.ShinhanApiService;
-import jakarta.servlet.http.HttpSession;
+import com.solfamily.istory.global.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class UserService {
 
         // 신한 API에서 받아온 사용자키 userEntity에 저장
         var userKey = userInfo.get("userKey");
-        log.info("userKey : {}", userKey);
+//        log.info("userKey : {}", userKey);
         userEntity.setUserKey(userKey.toString());
 
         var entity = userRepository.save(userEntity);
@@ -74,9 +75,11 @@ public class UserService {
                     .body("Not Exist User : 존재하지 않는 회원입니다.");
         }
 
+        var entity = optionalUserEntity.get();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userConverterService.toDto(optionalUserEntity.get()));
+                .body(userConverterService.toDto(entity));
     }
 
     // 모든 유저 조회
@@ -104,13 +107,18 @@ public class UserService {
 
     // 유저 로그인
     public ResponseEntity userLogin(
-            LoginRequest loginRequest,
-            HttpSession session
+            LoginRequest loginRequest
+            // HttpSession session
     ) {
 
         var userId = loginRequest.getUserId();
         var userPw = loginRequest.getUserPw();
 
+        if (userId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Not Exist Id : 아이디 값이 존재하지 않습니다.");
+        }
         var optionalEntity = userRepository.findById(userId);
 
         // id가 없으면
