@@ -2,8 +2,6 @@ FROM bellsoft/liberica-openjdk-alpine:17
 
 CMD ["./gradlew", "clean", "build"]
 
-VOLUME /tmp
-
 ARG JAR_FILE=build/libs/istory-0.0.1-SNAPSHOT.jar
 
 COPY .env .env
