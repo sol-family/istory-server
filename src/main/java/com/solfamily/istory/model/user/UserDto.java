@@ -11,7 +11,6 @@ import lombok.*;
 @Builder
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserDto {
-
     private String userId;
     private String userName;
     private String userPhone;

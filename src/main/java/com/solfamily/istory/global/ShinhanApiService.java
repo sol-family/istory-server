@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ShinhanApiService {
-    private static String apiKey = "";
+    private static String apiKey = "816441c46c2d4923bbfdd8c561b52131";
 
     // 사용자 계정 생성 API
     public Map<String, Object> userJoin(

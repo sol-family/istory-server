@@ -4,7 +4,6 @@ import com.solfamily.istory.model.user.LoginRequest;
 import com.solfamily.istory.model.user.UserEntity;
 import com.solfamily.istory.service.user.UserInviteService;
 import com.solfamily.istory.service.user.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
@@ -37,12 +36,6 @@ public class UserApiController {
         return userInviteService.userJoinByInvite(userEntity);
     }
 
-    // 모든 유저 조회
-    @GetMapping ("/all")
-    public ResponseEntity getAllUser() {
-        return userService.getAlluser();
-    }
-
     // 단일 유저 조회
     @GetMapping("/userId/{userId}")
     public ResponseEntity getUser(
@@ -50,6 +43,12 @@ public class UserApiController {
             String userId
     ) {
         return userService.getUser(userId);
+    }
+
+    // 모든 유저 조회
+    @GetMapping ("/all")
+    public ResponseEntity getAllUser() {
+        return userService.getAlluser();
     }
 
     // 아이디 중복 확인
@@ -63,11 +62,20 @@ public class UserApiController {
 
     // 초대코드 발급
     @PostMapping("/invite")
-    public String userInvite(
+    public ResponseEntity<String> userInvite(
             @RequestParam(name = "family_key")
             String familyKey
     ) {
         return userInviteService.userInvite(familyKey);
+    }
+
+    // 초대코드 유효성 검사
+    @PostMapping("/checkInviteCode")
+    public ResponseEntity checkInviteCode(
+            @RequestParam(name = "invite_code")
+            String inviteCode
+    ) {
+        return userInviteService.checkInviteCode(inviteCode);
     }
 
     // 유저 로그인
