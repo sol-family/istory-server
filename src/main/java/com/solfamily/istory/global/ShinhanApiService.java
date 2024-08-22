@@ -1,4 +1,4 @@
-package com.solfamily.istory.service.shinhanapi;
+package com.solfamily.istory.global;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
