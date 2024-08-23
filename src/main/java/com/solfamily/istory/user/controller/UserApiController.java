@@ -1,9 +1,9 @@
-package com.solfamily.istory.controller.user;
+package com.solfamily.istory.user.controller;
 
-import com.solfamily.istory.model.user.LoginRequest;
-import com.solfamily.istory.model.user.UserEntity;
-import com.solfamily.istory.service.user.UserInviteService;
-import com.solfamily.istory.service.user.UserService;
+import com.solfamily.istory.user.model.LoginRequest;
+import com.solfamily.istory.user.model.UserEntity;
+import com.solfamily.istory.user.service.UserInviteService;
+import com.solfamily.istory.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +53,7 @@ public class UserApiController {
 
     // 아이디 중복 확인
     @PostMapping("/checkId")
-    public boolean checkId(
+    public ResponseEntity<Boolean> checkId(
             @RequestParam
             String userId
     ) {

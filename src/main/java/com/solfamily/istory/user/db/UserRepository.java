@@ -1,9 +1,8 @@
-package com.solfamily.istory.db.user;
+package com.solfamily.istory.user.db;
 
-import com.solfamily.istory.model.user.UserEntity;
+import com.solfamily.istory.user.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<UserEntity, String> {
-
-    String findUserKeyByUserId(String userId);
+    String findUserKeyByFamilyKey(String familyKey);
 }
