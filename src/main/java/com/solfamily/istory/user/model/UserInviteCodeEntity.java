@@ -1,4 +1,4 @@
-package com.solfamily.istory.model.user;
+package com.solfamily.istory.user.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Entity(name = "userInvite")
 @Table(name = "istory_user_invite")
-public class UserInviteEntity {
+public class UserInviteCodeEntity {
 
     @Id
     private String inviteCode;

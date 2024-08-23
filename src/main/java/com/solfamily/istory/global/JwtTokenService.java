@@ -1,4 +1,4 @@
-package com.solfamily.istory.service.user;
+package com.solfamily.istory.global;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,8 +17,8 @@ import java.util.Map;
     @Slf4j
     @Service
     public class JwtTokenService {
-
-        private static String secretKey = "";
+        @Value("${JWT_SECRET_KEY}")
+        private static String secretKey;
 
         // 토큰 발행
         public static String create(

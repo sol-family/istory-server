@@ -1,4 +1,4 @@
-package com.solfamily.istory.service.user;
+package com.solfamily.istory.global;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;

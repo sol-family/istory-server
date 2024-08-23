@@ -18,15 +18,15 @@ services:
       - --lower_case_table_names=1
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-    container_name: istory-db
+    container_name: ${MYSQL_HOST}
     ports:
       - "3307:3306"
     environment:
-      - MYSQL_DATABASE=istory
-      - MYSQL_PASSWORD=secret
-      - MYSQL_ROOT_PASSWORD=ssafy1234!!
-      - MYSQL_USER=testUser
-      - TZ=Asia/Seoul
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: ${TZ}
     volumes:
       - istory-db:/var/lib/mysql
     networks:
