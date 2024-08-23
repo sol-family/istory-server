@@ -1,4 +1,4 @@
-package com.solfamily.istory.model.user;
+package com.solfamily.istory.user.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

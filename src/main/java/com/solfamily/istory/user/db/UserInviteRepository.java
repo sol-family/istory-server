@@ -1,9 +1,9 @@
-package com.solfamily.istory.db.user;
+package com.solfamily.istory.user.db;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import com.solfamily.istory.model.user.UserInviteCodeEntity;
+import com.solfamily.istory.user.model.UserInviteCodeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

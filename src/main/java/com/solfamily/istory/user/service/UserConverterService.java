@@ -1,7 +1,7 @@
-package com.solfamily.istory.service.user;
+package com.solfamily.istory.user.service;
 
-import com.solfamily.istory.model.user.UserDto;
-import com.solfamily.istory.model.user.UserEntity;
+import com.solfamily.istory.user.model.UserDto;
+import com.solfamily.istory.user.model.UserEntity;
 import org.springframework.stereotype.Service;
 
 @Service

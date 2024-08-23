@@ -1,10 +1,10 @@
-package com.solfamily.istory.service.user;
+package com.solfamily.istory.user.service;
 
-import com.solfamily.istory.db.user.UserInviteRepository;
-import com.solfamily.istory.db.user.UserRepository;
+import com.solfamily.istory.user.db.UserInviteRepository;
+import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.global.PasswordService;
-import com.solfamily.istory.model.user.UserEntity;
-import com.solfamily.istory.model.user.UserInviteCodeEntity;
+import com.solfamily.istory.user.model.UserEntity;
+import com.solfamily.istory.user.model.UserInviteCodeEntity;
 import com.solfamily.istory.global.ShinhanApiService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class UserInviteService {
     public ResponseEntity userJoinByInvite(
             UserEntity userEntity
     ) {
-        String inviteCode = userEntity.getInviteCode();
+        String inviteCode = userEntity.getInviteCode(); // 유저엔티티로부터 초대코드를 받아옴
         String userId = userEntity.getUserId(); // 유저엔티티로부터 아이디를 받아옴
         String userPw = userEntity.getUserPw(); // 유저엔티티로부터 비밀번호를 받아옴
 
