@@ -13,6 +13,6 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query(value ="select family_key from istory_user where user_id = ?1", nativeQuery = true)
     Optional<String> getFamilyKeyByUserId(String userId);
 
-    @Query(value = "select * from istory_user where family_key = ?!", nativeQuery = true)
+    @Query(value = "select * from istory_user where family_key = ?1", nativeQuery = true)
     Optional<List<UserEntity>> findUsersByFamilyKey(String familyKey);
 }

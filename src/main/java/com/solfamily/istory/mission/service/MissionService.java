@@ -102,6 +102,7 @@ public class MissionService{
             }
             familyMissionRepository.updateComplete(1,familyMissionEntity.get().getFamilymissionNo());
         }else{
+            System.out.println("order is 1");
             for(UserDto user : member){
                 Optional<ReportEntity> entity = reportRepository.findById(new ReportEntityId(user.getUserId(),familyMissionEntity.get().getFamilymissionNo()));
                 if(entity.isEmpty()) {

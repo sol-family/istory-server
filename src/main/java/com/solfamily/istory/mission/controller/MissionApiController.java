@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.*;
 
 @Controller
-@RequestMapping("/api/mission/*")
+@RequestMapping("/mission/*")
 public class MissionApiController {
     @Autowired
     private MissionService service;
@@ -22,6 +22,7 @@ public class MissionApiController {
     // 금주 미션 조회
     @PostMapping("weekly")
     public ResponseEntity<Map> weekly(String userId) {
+        System.out.println("weekly");
         return service.getWeeklyMission(userId);
     }
 
