@@ -1,5 +1,6 @@
 package com.solfamily.istory.mission.model.entity;
 
+import com.solfamily.istory.mission.model.dto.ReportDto;
 import com.solfamily.istory.mission.model.entity.id.ReportEntityId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

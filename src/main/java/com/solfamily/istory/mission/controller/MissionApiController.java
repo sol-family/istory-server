@@ -15,38 +15,26 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/api/mission/*")
-public class MissionController {
+public class MissionApiController {
     @Autowired
     private MissionService service;
 
     // 금주 미션 조회
     @PostMapping("weekly")
     public ResponseEntity<Map> weekly(String userId) {
-        Map<String, Object> response = service.getWeeklyMission(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return service.getWeeklyMission(userId);
     }
 
     @PostMapping("reportUpdate")
     public ResponseEntity<String> reportUpdate(@RequestBody ReportDto report){
-        if(reportService.updateReportByEntitly(report)){
-            return new ResponseEntity<>("{\"success\": true}",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("{\"success\": false}",HttpStatus.OK);
-        }
+        return  service.updateReportByEntitly(report);
     }
 
 
     @GetMapping("create")
     public ResponseEntity<String> createMissionList(String familyKey,String startDate) {
-        boolean success = familyMissionService.createMissionsByFamilyKey(familyKey,startDate);
+        boolean success = service.createMissionsByFamilyKey(familyKey,startDate);
         return new ResponseEntity<>("{\"success\": "+success+"}", HttpStatus.OK);
     }
-
-    @GetMapping("test")
-    public ResponseEntity<String> test() {
-        String key = userService.getFamilyKeyByUserId("apple@naver.com");
-        return new ResponseEntity<>(key,HttpStatus.OK);
-    }
-
 
 }

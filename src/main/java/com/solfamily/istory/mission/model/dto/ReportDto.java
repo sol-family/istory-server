@@ -1,6 +1,7 @@
 package com.solfamily.istory.mission.model.dto;
 
-import com.solfamily.istory.mission.model.user.UserDto;
+import com.solfamily.istory.mission.model.entity.ReportEntity;
+import com.solfamily.istory.user.model.UserDto;
 import lombok.Data;
 
 @Data
@@ -9,4 +10,11 @@ public class ReportDto {
     private Long familymissionNo;
     private String thoughts;
     private int complete;
+
+    public ReportDto(ReportEntity reportEntity, UserDto user) {
+        this.user = user;
+        this.familymissionNo = reportEntity.getId().getFamilymissionNo();
+        this.thoughts = reportEntity.getThoughts();
+        this.complete = reportEntity.getComplete();
+    }
 }

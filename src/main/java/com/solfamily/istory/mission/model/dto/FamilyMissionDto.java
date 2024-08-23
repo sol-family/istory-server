@@ -1,10 +1,10 @@
 package com.solfamily.istory.mission.model.dto;
 
-import com.solfamily.istory.mission.model.user.UserDto;
+import com.solfamily.istory.user.model.UserDto;
 import lombok.Data;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class FamilyMissionDto {
