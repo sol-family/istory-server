@@ -10,10 +10,10 @@ import java.util.Objects;
 @Embeddable
 @Data
 public class ReportEntityId implements Serializable {
-    @Column(name = "user_id") // 컬럼 매핑 추가
+    @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "familymission_no") // 컬럼 매핑 추가
+    @Column(name = "familymission_no")
     private Long familymissionNo;
 
     public ReportEntityId() {}

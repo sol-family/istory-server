@@ -12,9 +12,7 @@ import com.solfamily.istory.mission.model.entity.id.ReportEntityId;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
-import com.solfamily.istory.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +39,6 @@ public class MissionService{
         }
         String date = LocalDateTime.now().toString().substring(0,10);
 
-//        Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.getFamilyMissionByDate(date, familyKey.get());
         Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.findByRegistDateLessThanEqualAndExpirationDateGreaterThanEqualAndFamilyKey(date, date, familyKey.get());
         if(familyMissionEntity.isEmpty()) {
             String errorMsg = "";
@@ -52,7 +49,6 @@ public class MissionService{
 
         weeklyMission.setFamilymissionNo(familyMissionEntity.get().getFamilymissionNo());
 
-        // 미션 내용 구하기
         Optional<MissionEntity> missionEntity = missionRepository.findById(familyMissionEntity.get().getMissionNo());
         if(missionEntity.isEmpty()) {
             String errorMsg = "";
@@ -67,7 +63,6 @@ public class MissionService{
         weeklyMission.setExpirationDate(familyMissionEntity.get().getExpirationDate());
 
 
-        // 가족 구성원
         Optional<List<UserEntity>> userEntityList = userRepository.findUsersByFamilyKey(familyKey.get());
         if(userEntityList.isEmpty()) {
             String errorMsg = "";
@@ -81,17 +76,14 @@ public class MissionService{
 
         weeklyMission.setMember(member);
 
-        // 미션 주차 구하기
         Optional<Integer> weeklyNum = familyMissionRepository.getWeeklyNum(familyKey.get(),date);
         if(weeklyNum.isEmpty()) {
             String errorMsg = "";
             return errorResponse(errorMsg);
         }
 
-        // 가족미션 인스턴스만 생성됐을 때
         int order = familyMissionEntity.get().getComplete();
         Map<String, ReportDto> reports = new HashMap<>();
-        // 0 : 가족미션의 소감entity 미생성, 생성 과정 진행
         if(order==0){
             for(UserDto user : member){
                 ReportEntity entity = new ReportEntity();
@@ -104,7 +96,6 @@ public class MissionService{
             }
             familyMissionRepository.updateCompleteByFamilyMissionNo(1,familyMissionEntity.get().getFamilymissionNo());
         }else{
-            System.out.println("order is 1");
             for(UserDto user : member){
                 Optional<ReportEntity> entity = reportRepository.findById(new ReportEntityId(user.getUserId(),familyMissionEntity.get().getFamilymissionNo()));
                 if(entity.isEmpty()) {
@@ -143,7 +134,6 @@ public class MissionService{
             Collections.shuffle(missionIdList);
             List<Long> randomNos = missionIdList.stream().limit(52).toList();
 
-            // 입력 날짜 형식
             String dateFormatType = "yyyy-MM-dd";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormatType);
             Date date = simpleDateFormat.parse(startDate);

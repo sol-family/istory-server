@@ -16,7 +16,5 @@ public class FamilyMissionDto {
     private String expirationDate;
     private int complete;
     private List<UserDto> member;
-    // key : 가족 구성원 아이디 value : 감상문
     private Map<String, ReportDto> reports;
-
 }

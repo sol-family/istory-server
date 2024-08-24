@@ -18,7 +18,6 @@ public class MissionApiController {
     @Autowired
     private MissionService service;
 
-    // 금주 미션 조회
     @PostMapping("weeklyMission")
     public ResponseEntity<Map> getWeeklyMission(String userId) {
         return service.getWeeklyMission(userId);
