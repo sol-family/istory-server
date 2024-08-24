@@ -3,7 +3,6 @@ package com.solfamily.istory.mission.controller;
 import com.solfamily.istory.mission.model.dto.ReportDto;
 import com.solfamily.istory.mission.service.MissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,22 +19,20 @@ public class MissionApiController {
     private MissionService service;
 
     // 금주 미션 조회
-    @PostMapping("weekly")
-    public ResponseEntity<Map> weekly(String userId) {
-        System.out.println("weekly");
+    @PostMapping("weeklyMission")
+    public ResponseEntity<Map> getWeeklyMission(String userId) {
         return service.getWeeklyMission(userId);
     }
 
-    @PostMapping("reportUpdate")
-    public ResponseEntity<String> reportUpdate(@RequestBody ReportDto report){
-        return  service.updateReportByEntitly(report);
+    @PostMapping("report")
+    public ResponseEntity<Map> updateReport(@RequestBody ReportDto report) {
+        return service.updateReportByEntity(report);
     }
 
 
-    @GetMapping("create")
-    public ResponseEntity<String> createMissionList(String familyKey,String startDate) {
-        boolean success = service.createMissionsByFamilyKey(familyKey,startDate);
-        return new ResponseEntity<>("{\"success\": "+success+"}", HttpStatus.OK);
+    @GetMapping("missions")
+    public ResponseEntity<Map> createMissions(String familyKey,String startDate) {
+        return service.createMissionsByFamilyKey(familyKey,startDate);
     }
 
 }

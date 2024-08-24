@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface ReportRepository extends JpaRepository<ReportEntity, ReportEntityId> {
     @Transactional
     @Modifying
-    @Query(value = "update istory_report set thoughts = ?1, write_date = now(), complete = 1 where user_id = ?2 and familymission_no = ?3", nativeQuery = true)
-    int updateReport(String thoughts, String userId, long familyMissionNo);
-
+    @Query("UPDATE ReportEntity r SET r.thoughts = ?1, r.write_date = ?2, r.complete = ?3 WHERE r.id.userId = ?4 and r.id.familymissionNo = ?5")
+    int updateByUserIdAndFamilyMissionNo(String thoughts, String writeDate, int complete, String userId, long familyMissionNo);
 }

@@ -10,17 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FamilyMissionRepository extends JpaRepository<FamilyMissionEntity, Long> {
-    @Query(value = "SELECT * FROM istory_familymission WHERE (?1 BETWEEN regist_date AND expiration_date) and family_Key = ?2", nativeQuery = true)
-    Optional<FamilyMissionEntity> getFamilyMissionByDate(String date, String familyKey);
+    Optional<FamilyMissionEntity> findByRegistDateLessThanEqualAndExpirationDateGreaterThanEqualAndFamilyKey(String date1, String date2, String familyKey);
 
     @Transactional
     @Modifying
-    @Query(value = "update istory_familymission set complete = ?1 where familymission_no = ?2", nativeQuery = true)
-    int updateComplete(int order, long familymissionNo);
+    @Query("UPDATE FamilyMissionEntity f SET f.complete = ?1 WHERE f.familymissionNo = ?2")
+    int updateCompleteByFamilyMissionNo(int complete, long familyMissionNo);
 
-
-    @Query(value = "SELECT * FROM istory_familymission WHERE  family_key = ?1 order by regist_date", nativeQuery = true)
-    List<FamilyMissionEntity> getMissionsByFamilyKey(String familyKey);
+    Optional<List<FamilyMissionEntity>> findByFamilyKeyOrderByRegistDate(String familyKey);
 
     @Query(value = "select weekly_num from ( select regist_date, expiration_date, row_number() over (order by regist_date) AS weekly_num FROM istory_familymission where family_key = ?1 ) family_missions where ?2 between regist_date and expiration_date", nativeQuery = true)
     Optional<Integer> getWeeklyNum(String familyKey,String  date);

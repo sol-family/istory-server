@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class FamilyMissionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="familymission_no",nullable = false)
     private Long familymissionNo;
 
     @Column(name="mission_no",nullable = false)

@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -40,7 +41,8 @@ public class MissionService{
         }
         String date = LocalDateTime.now().toString().substring(0,10);
 
-        Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.getFamilyMissionByDate(date, familyKey.get());
+//        Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.getFamilyMissionByDate(date, familyKey.get());
+        Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.findByRegistDateLessThanEqualAndExpirationDateGreaterThanEqualAndFamilyKey(date, date, familyKey.get());
         if(familyMissionEntity.isEmpty()) {
             String errorMsg = "";
             return errorResponse(errorMsg);
@@ -100,7 +102,7 @@ public class MissionService{
                 reportRepository.save(entity);
                 reports.put(user.getUserId(),new ReportDto(entity,user));
             }
-            familyMissionRepository.updateComplete(1,familyMissionEntity.get().getFamilymissionNo());
+            familyMissionRepository.updateCompleteByFamilyMissionNo(1,familyMissionEntity.get().getFamilymissionNo());
         }else{
             System.out.println("order is 1");
             for(UserDto user : member){
@@ -119,27 +121,65 @@ public class MissionService{
         response.put("weeklyNum",weeklyNum.get());
         response.put("weeklyMission", weeklyMission);
         response.put("showCheck",showCheck);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<String> updateReportByEntitly(ReportDto report) {
+    public ResponseEntity<Map> updateReportByEntity(ReportDto report) {
         String thoughts = report.getThoughts();
+        String writeDate = LocalDateTime.now().toString().replace("T", " ").substring(0, 19);
         String userId = report.getUser().getUserId();
         long familymissionNo = report.getFamilymissionNo();
-        if(reportRepository.updateReport(thoughts,userId,familymissionNo)==1){
-            return new ResponseEntity<>("{\"success\": true}", HttpStatus.OK);
+        if(reportRepository.updateByUserIdAndFamilyMissionNo(thoughts, writeDate,1,userId,familymissionNo)==1){
+            return ResponseEntity.ok(Collections.singletonMap("success", "true"));
         }else{
-            return new ResponseEntity<>("{\"success\": false}", HttpStatus.OK);
+            return errorResponse("");
         }
     }
 
-    public boolean createMissionsByFamilyKey(String familyKey, String startDate) {
-        return false;
+    public ResponseEntity<Map> createMissionsByFamilyKey(String familyKey, String startDate) {
+        try {
+            List<Long> missionIdList = missionRepository.findAllMissionNos();
+
+            Collections.shuffle(missionIdList);
+            List<Long> randomNos = missionIdList.stream().limit(52).toList();
+
+            // 입력 날짜 형식
+            String dateFormatType = "yyyy-MM-dd";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormatType);
+            Date date = simpleDateFormat.parse(startDate);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+
+            String registDate = startDate;
+            String endDate;
+            for (Long missionId : randomNos) {
+                for (Long missionNo : randomNos) {
+                    cal.add(Calendar.DAY_OF_MONTH, 6);
+                    endDate = simpleDateFormat.format(cal.getTime());
+
+                    FamilyMissionEntity familyMissionEntity = new FamilyMissionEntity();
+                    familyMissionEntity.setFamilyKey(familyKey);
+                    familyMissionEntity.setMissionNo(missionId);
+                    familyMissionEntity.setFamilyKey(familyKey);
+                    familyMissionEntity.setMissionNo(missionNo);
+                    familyMissionEntity.setRegistDate(registDate);
+                    familyMissionEntity.setExpirationDate(endDate);
+                    familyMissionEntity.setComplete(0);
+                    familyMissionRepository.save(familyMissionEntity);
+
+                    familyMissionRepository.save(familyMissionEntity);
+                    cal.add(Calendar.DAY_OF_MONTH, 1);
+                    registDate = simpleDateFormat.format(cal.getTime());
+                }
+            }
+            return ResponseEntity.ok(Collections.singletonMap("success", "true"));
+        }catch (Exception e){
+            return errorResponse("");
+        }
     }
 
     private ResponseEntity<Map> errorResponse(String msg){
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("errorMsg", msg);
-        return new ResponseEntity<>(errorResponse, HttpStatus.OK);
+        return ResponseEntity.ok(Collections.singletonMap("errorMsg", msg));
     }
+
 }

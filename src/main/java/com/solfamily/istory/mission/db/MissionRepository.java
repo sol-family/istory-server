@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MissionRepository extends JpaRepository<MissionEntity, Long> {
-    @Query(value="select mission_no from istory_mission",nativeQuery = true)
-    List<Long> findAllIds();
+    @Query("SELECT m.missionNo FROM MissionEntity m")
+    List<Long> findAllMissionNos();
 }
