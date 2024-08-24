@@ -39,7 +39,7 @@ public class UserApiController {
     }
 
     // 유저 상태 확인
-    @PostMapping("/status")
+    @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getUserStatus(
         HttpServletRequest request
     ) {
