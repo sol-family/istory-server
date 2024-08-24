@@ -20,7 +20,7 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     container_name: ${MYSQL_HOST}
     ports:
-      - "3306"
+      - "3307:3306"
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}

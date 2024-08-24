@@ -181,10 +181,10 @@ public class UserService {
         }
     }
 
-    // 유저Key 조회
-    public String getUserKey(
-            String userId
-    ) {
-        return userRepository.findUserKeyByUserId(userId);
-    }
+//    // 유저Key 조회
+//    public String getUserKey(
+//            String userId
+//    ) {
+//        return userRepository.findUserKeyByUserId(userId);
+//    }
 }
