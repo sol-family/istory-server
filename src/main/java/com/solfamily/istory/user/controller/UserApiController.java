@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@SpringBootApplication
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
