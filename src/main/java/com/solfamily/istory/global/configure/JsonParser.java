@@ -1,4 +1,4 @@
-package com.solfamily.istory.global;
+package com.solfamily.istory.global.configure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;

@@ -2,10 +2,10 @@ package com.solfamily.istory.user.service;
 
 import com.solfamily.istory.user.db.UserInviteRepository;
 import com.solfamily.istory.user.db.UserRepository;
-import com.solfamily.istory.global.PasswordService;
+import com.solfamily.istory.global.service.PasswordService;
 import com.solfamily.istory.user.model.UserEntity;
 import com.solfamily.istory.user.model.UserInviteCodeEntity;
-import com.solfamily.istory.global.ShinhanApiService;
+import com.solfamily.istory.global.service.ShinhanApiService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

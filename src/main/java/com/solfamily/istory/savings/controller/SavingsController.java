@@ -1,6 +1,5 @@
 package com.solfamily.istory.savings.controller;
 
-import com.solfamily.istory.global.ShinhanApiService;
 import com.solfamily.istory.savings.service.SavingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -2,6 +2,7 @@ package com.solfamily.istory.user.controller;
 
 import com.solfamily.istory.user.model.LoginRequest;
 import com.solfamily.istory.user.model.UserEntity;
+import com.solfamily.istory.user.service.FamilyService;
 import com.solfamily.istory.user.service.UserInviteService;
 import com.solfamily.istory.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class UserApiController {
 
     private final UserService userService;
     private final UserInviteService userInviteService;
+    private final FamilyService familyService;
 
     // 초대코드없이 회원가입
     @PostMapping("/join")
@@ -85,6 +87,14 @@ public class UserApiController {
         // HttpSession httpsession
     ) {
         return userService.userLogin(loginRequest);
+    }
+
+    // 가족 확정
+    @PostMapping("/confirmFamily")
+    public ResponseEntity confirmFamily(
+            String representiveUserId
+    ) {
+        return familyService.confirmFamily(representiveUserId);
     }
 
 }

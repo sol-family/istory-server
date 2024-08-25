@@ -1,6 +1,6 @@
 package com.solfamily.istory.savings.service;
 
-import com.solfamily.istory.global.ShinhanApiService;
+import com.solfamily.istory.global.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
