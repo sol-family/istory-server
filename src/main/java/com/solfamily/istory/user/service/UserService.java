@@ -1,13 +1,13 @@
 package com.solfamily.istory.user.service;
 
+import com.solfamily.istory.user.db.FamilyRepository;
 import com.solfamily.istory.user.db.UserRepository;
-import com.solfamily.istory.global.JsonParser;
-import com.solfamily.istory.global.JwtTokenService;
-import com.solfamily.istory.global.PasswordService;
+import com.solfamily.istory.global.configure.JsonParser;
+import com.solfamily.istory.global.service.JwtTokenService;
+import com.solfamily.istory.global.service.PasswordService;
 import com.solfamily.istory.user.model.LoginRequest;
-import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
-import com.solfamily.istory.global.ShinhanApiService;
+import com.solfamily.istory.global.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserConverterService userConverterService;
+    private final FamilyRepository familyRepository;
     private final PasswordService passwordService;
     private final ShinhanApiService shinhanApiService;
     private final JsonParser jsonParser;
@@ -40,23 +41,6 @@ public class UserService {
         
         var hashedUserPw = passwordService.hashPassword(userPw); // 유저 비밀번호 암호화
         userEntity.setUserPw(hashedUserPw); // 암호화된 비밀번호로 재저장
-        
-        String familyKey = "familyKey/" + UUID.randomUUID().toString(); // 고유한 패밀리키(식별키) 생성
-        userEntity.setFamilyKey(familyKey); // 유저엔티티에 패밀리키 저장
-
-        // 신한 API 연동(사용자 계정 생성)
-        Map<String, Object> userInfo  = shinhanApiService.userJoin(userId);
-
-        if(userInfo.get("userKey").equals("")) {
-            String msg = "";
-            String json = jsonParser.toJson(msg);
-            return ResponseEntity
-                    .status(HttpStatus.OK) // 200 error
-                    .body(json); // 내부적으로 정한 에러코드 (신한 API로부터 사용자 계정이 제대로 생성되지 않았을 때 = )
-        }
-        
-        var userKey = userInfo.get("userKey"); // 신한 API로부터 userKey를 받아옴
-        userEntity.setUserKey(userKey.toString()); // 받아온 userKey를 유저엔티티에 저장
 
         var entity = userRepository.save(userEntity); // 유저 엔티티를 istory_user 테이블에 저장
 
@@ -124,17 +108,18 @@ public class UserService {
 
         // 만약 유저아이디 또는 비밀번호가 존재하지 않는다면
         if (userId == null || userPw == null) {
-            String msg = "";
+            String msg = "아이디 없음";
             String json = jsonParser.toJson(msg);
             return ResponseEntity
                     .status(HttpStatus.OK) // 200 OK
                     .body(json); // 내부적으로 정한 에러코드 (로그인 요청 시 아이디 또는 비밀번호 값이 비어있을 때 = )
         }
+
         var optionalEntity = userRepository.findById(userId); // istory_user 테이블로부터 유저아이디 조회
 
         // istory_user 테이블에 해당 아이디가 존재하지 않는다면
         if(optionalEntity.isEmpty()) {
-            String msg = "";
+            String msg = "아이디 없음";
             String json = jsonParser.toJson(msg);
             return ResponseEntity
                     .status(HttpStatus.OK) // 200 OK
@@ -163,16 +148,12 @@ public class UserService {
                 Map<String, Object> response = new HashMap<>();
                 response.put("jwtToken", jwtToken); // 응답에 jwtToken 저장
 
-                // 사용자 정보는 별도로 제공
-                UserDto userDto = userConverterService.toDto(entity);
-                response.put("userDto", userDto); // 응답에 userDto 저장
-
                 // 상태코드와 JWT Token, 유저정보가 담긴 Response 반환
                 return ResponseEntity
                         .status(HttpStatus.OK) // 200 OK
                         .body(response);
             } else { // 비밀번호가 일치하지 않으면
-                String msg = "";
+                String msg = "비밀번호 틀림";
                 String json = jsonParser.toJson(msg);
                 return ResponseEntity
                         .status(HttpStatus.OK) // 200 OK
@@ -180,11 +161,4 @@ public class UserService {
             }
         }
     }
-
-//    // 유저Key 조회
-//    public String getUserKey(
-//            String userId
-//    ) {
-//        return userRepository.findUserKeyByUserId(userId);
-//    }
 }
