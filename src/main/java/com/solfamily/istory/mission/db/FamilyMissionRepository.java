@@ -21,4 +21,8 @@ public interface FamilyMissionRepository extends JpaRepository<FamilyMissionEnti
 
     @Query(value = "select weekly_num from ( select regist_date, expiration_date, row_number() over (order by regist_date) AS weekly_num FROM istory_familymission where family_key = ?1 ) family_missions where ?2 between regist_date and expiration_date", nativeQuery = true)
     Optional<Integer> getWeeklyNum(String familyKey,String  date);
+
+    //select family_missions.* from (select * from istory_familymission where family_key = 'testfamilykey' order by regist_date) family_missions limit 50,1;
+//    @Query(value = "select FamilyMissionEntity from istory_familymission f where f.family_key = ?1 order by f.regist_date limit ?2 ,?3")
+//    Optional<FamilyMissionEntity> getFamilyMissionByWeekNum(String familyKey,int startRow, int weekNum);
 }
