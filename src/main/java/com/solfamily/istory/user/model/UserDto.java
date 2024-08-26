@@ -18,7 +18,6 @@ public class UserDto {
     private String userBirth;
     private String userType;
     private String userProfile;
-    private String familyKey;
 
     public UserDto(UserEntity entity){
         this.userId = entity.getUserId();
@@ -28,6 +27,5 @@ public class UserDto {
         this.userBirth = entity.getUserBirth();
         this.userType = entity.getUserType();
         this.userProfile = entity.getUserProfile();
-        this.familyKey = entity.getFamilyKey();
     }
 }

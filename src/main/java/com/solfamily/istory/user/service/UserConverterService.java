@@ -17,7 +17,6 @@ public class UserConverterService {
                 .userBirth(userEntity.getUserBirth())
                 .userType(userEntity.getUserType())
                 .userProfile(userEntity.getUserProfile())
-                .familyKey(userEntity.getFamilyKey())
                 .build();
     };
 }

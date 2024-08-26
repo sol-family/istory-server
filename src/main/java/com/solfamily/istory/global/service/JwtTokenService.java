@@ -1,4 +1,4 @@
-package com.solfamily.istory.global;
+package com.solfamily.istory.global.service;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
