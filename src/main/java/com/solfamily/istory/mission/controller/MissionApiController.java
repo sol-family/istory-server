@@ -5,10 +5,10 @@ import com.solfamily.istory.mission.service.MissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -28,10 +28,18 @@ public class MissionApiController {
         return service.updateReportByEntity(report);
     }
 
-
-    @GetMapping("missions")
-    public ResponseEntity<Map> createMissions(String familyKey,String startDate) {
-        return service.createMissionsByFamilyKey(familyKey,startDate);
+    @PostMapping("missionImg")
+    public ResponseEntity<Map> registMissionImg(long familyMissionNo, MultipartFile missionImg) {
+        return service.registMissionImg(familyMissionNo,missionImg);
     }
 
+    @PostMapping("roundMissions")
+    public ResponseEntity<Map> getMissionsByRound(String userId, int roundNum) {
+        return service.getMissionsByRound(userId,roundNum);
+    }
+
+    @PostMapping("week")
+    public ResponseEntity<Map> getMissionByWeek(String userId, int roundNum,int weekNum) {
+        return service.getMissionByWeek(userId, roundNum, weekNum);
+    }
 }
