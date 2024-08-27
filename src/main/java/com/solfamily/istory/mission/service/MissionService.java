@@ -16,6 +16,9 @@ import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,10 +88,11 @@ public class MissionService {
 
         weeklyMission.setMember(member);
 
-        Optional<Integer> weeklyNum = familyMissionRepository.getWeeklyNum(familyKey.get(), date);
-        if (weeklyNum.isEmpty()) {
+        Optional<Integer> temp = familyMissionRepository.getWeeklyNum(familyKey.get(), date);
+        if (temp.isEmpty()) {
             return errorResponse("M105");
         }
+        int weeklyNum = temp.get()%52;
 
         int order = familyMissionEntity.get().getComplete();
         Map<String, ReportDto> reports = new HashMap<>();
@@ -124,7 +128,7 @@ public class MissionService {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("weeklyNum", weeklyNum.get());
+        response.put("weeklyNum", weeklyNum);
         response.put("showCheck", showCheck);
         response.put("missionImg",missionImgSystemname);
         response.put("weeklyMission", weeklyMission);
@@ -209,7 +213,104 @@ public class MissionService {
     }
 
     public ResponseEntity<Map> getMissionsByRound(String userId, int roundNum) {
-        return ResponseEntity.ok(Collections.singletonMap("result","true"));
+        Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
+        if (familyKey.isEmpty()) {
+            return errorResponse("M401");
+        }
+
+        if(roundNum == -1){
+//            roundNum = familyMissionRepository.
+        }
+
+
+        Pageable  pageable = PageRequest.of((roundNum-1)*52, 52);
+        Page<FamilyMissionEntity> resultPage = familyMissionRepository.findByFamilyKeyOrderByRegistDate(familyKey.get(), pageable);
+        List<FamilyMissionEntity> missions = resultPage.getContent();
+
+//        Optional<List<FamilyMissionEntity>> familyMissionList = familyMissionRepository.findByFamilyKeyOrderByRegistDate(familyKey.get());
+//        if (familyMissionList.isEmpty()) {
+//            return errorResponse("M402");
+//        }
+
+        if(roundNum == -1){
+//           familyMissionList
+        }
+
+//        FamilyMissionDto weeklyMission = new FamilyMissionDto();
+//
+//        weeklyMission.setFamilymissionNo(familyMissionEntity.get().getFamilymissionNo());
+//        MissionEntity missionEntity;
+//        try {
+//            System.out.println(getMissionMap());
+//            missionEntity = getMissionMap().get(familyMissionEntity.get().getMissionNo());
+//        }catch (Exception e){
+//            return errorResponse("M103");
+//        }
+//        weeklyMission.setMissionNo(missionEntity.getMissionNo());
+//        weeklyMission.setMissionContents(missionEntity.getContents());
+//
+//        weeklyMission.setFamilyKey(familyKey.get());
+//
+//        weeklyMission.setRegistDate(familyMissionEntity.get().getRegistDate());
+//        weeklyMission.setExpirationDate(familyMissionEntity.get().getExpirationDate());
+//
+//
+//        Optional<List<UserEntity>> userEntityList = userRepository.findUsersByFamilyKey(familyKey.get());
+//        if (userEntityList.isEmpty()) {
+//            return errorResponse("M104");
+//        }
+//
+//        List<UserDto> member = new ArrayList<>();
+//        for (UserEntity entity : userEntityList.get()) {
+//            member.add(new UserDto(entity));
+//        }
+//
+//        weeklyMission.setMember(member);
+//
+//        Optional<Integer> weeklyNum = familyMissionRepository.getWeeklyNum(familyKey.get(), date);
+//        if (weeklyNum.isEmpty()) {
+//            return errorResponse("M105");
+//        }
+//
+//        int order = familyMissionEntity.get().getComplete();
+//        Map<String, ReportDto> reports = new HashMap<>();
+//        if (order == 0) {
+//            for (UserDto user : member) {
+//                ReportEntity entity = new ReportEntity();
+//                entity.setId(new ReportEntityId(user.getUserId(), familyMissionEntity.get().getFamilymissionNo()));
+//                entity.setThoughts("");
+//                entity.setWrite_date(date);
+//                entity.setComplete(0);
+//                reportRepository.save(entity);
+//                reports.put(user.getUserId(), new ReportDto(entity, user));
+//            }
+//            familyMissionRepository.updateCompleteByFamilyMissionNo(1, familyMissionEntity.get().getFamilymissionNo());
+//        } else {
+//            for (UserDto user : member) {
+//                Optional<ReportEntity> entity = reportRepository.findById(new ReportEntityId(user.getUserId(), familyMissionEntity.get().getFamilymissionNo()));
+//                if (entity.isEmpty()) {
+//                    return errorResponse("M106");
+//                }
+//                reports.put(user.getUserId(), new ReportDto(entity.get(), user));
+//            }
+//        }
+//        weeklyMission.setReports(reports);
+//        boolean showCheck = reports.get(userId).getComplete() == 1;
+//
+//        Optional<MissionImgEntity> missionImg =  missionImgRepository.findByFamilymissionNo(familyMissionEntity.get().getFamilymissionNo());
+//        String missionImgSystemname;
+//        if (missionImg.isEmpty()) {
+//            missionImgSystemname = "";
+//        }else{
+//            missionImgSystemname = (missionImg.get().getSystemname()==null)?"":missionImg.get().getSystemname();
+//        }
+
+        Map<String, Object> response = new HashMap<>();
+//        response.put("weeklyNum", weeklyNum.get());
+//        response.put("showCheck", showCheck);
+//        response.put("missionImg",missionImgSystemname);
+//        response.put("weeklyMission", weeklyMission);
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<Map> getMissionByWeek(String userId, int roundNum, int weekNum) {

@@ -25,9 +25,6 @@ public class FileService {
     @Value("${FILE_DIRECTORY}")
     private String saveFolder;
 
-    @Autowired
-    private MissionImgRepository missionImgRepository;
-
     public ResponseEntity<Resource> getThumbnailResource(String systemname) throws Exception {
         Path path = Paths.get(saveFolder+systemname);
         String contentType = Files.probeContentType(path);
