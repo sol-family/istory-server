@@ -4,8 +4,6 @@ CMD ["./gradlew", "clean", "build"]
 
 ARG JAR_FILE=build/libs/istory-0.0.1-SNAPSHOT.jar
 
-MKDIR /imgFiles
-
 COPY .env .env
 
 COPY ${JAR_FILE} app.jar
