@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public interface MissionImgRepository extends JpaRepository<MissionImgEntity, String> {
     Optional<MissionImgEntity> findByFamilymissionNo(long familymissionNo);

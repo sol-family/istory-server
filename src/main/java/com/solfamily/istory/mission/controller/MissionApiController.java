@@ -33,23 +33,13 @@ public class MissionApiController {
         return service.registMissionImg(familyMissionNo,missionImg);
     }
 
-    @PostMapping("/roundMissions")
+    @PostMapping("roundMissions")
     public ResponseEntity<Map> getMissionsByRound(String userId, int roundNum) {
         return service.getMissionsByRound(userId,roundNum);
     }
 
-    @PostMapping("/week")
+    @PostMapping("week")
     public ResponseEntity<Map> getMissionByWeek(String userId, int roundNum,int weekNum) {
         return service.getMissionByWeek(userId, roundNum, weekNum);
     }
-
-//    @PostMapping("missions")
-//    public ResponseEntity<Map> createMissions(String familyKey,String startDate) {
-//        return service.createMissionsByFamilyKey(familyKey,startDate);
-//    }
-
-//    @PostMapping
-//    public ResponseEntity<Map> showMission(String userId, int weekNum) {
-//        return service.getMissionByWeekNum(userId,weekNum);
-//    }
 }
