@@ -19,7 +19,7 @@ import java.util.Map;
 @Service
 public class ShinhanApiService {
     @Value("${SHINHAN_API_KEY}")
-    private static String apiKey;
+    private String apiKey;
     private static String apiName = "inquireSavingsProducts";
     private static String transmissionDate = "20240101";
     private static String transmissionTime = "121212";
@@ -50,6 +50,7 @@ public class ShinhanApiService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+            log.info("SHINHAN_API_KEY: {}", apiKey);
             log.info("Response Code: {}", response.statusCode());
             log.info("Response Body: {}", response.body());
 
@@ -235,8 +236,6 @@ public class ShinhanApiService {
         }
     }
 
-}
-
 //    API키 발급
 //    public static void main(String[] args) {
 //        HttpClient client = HttpClient.newHttpClient();
@@ -265,4 +264,5 @@ public class ShinhanApiService {
 //            e.printStackTrace();
 //        }
 //    }
-//}
+}
+

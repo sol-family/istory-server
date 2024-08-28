@@ -98,7 +98,7 @@ public class UserService {
         var userEntity = userRepository.findById(userId); // 아이스토리 DB에서 유저 아이디 조회
 
         // 조회된 아이디가 없으면
-        if (userEntity.isEmpty()) {
+        if (userEntity.isPresent()) {
             String errorCode = "S1";
             response.put("result", false);
             response.put("errorCode", errorCode);
@@ -125,14 +125,10 @@ public class UserService {
             response.put("result", false);
             response.put("error_code", errorCode);
         } else {
-            var userEntity = userRepository.findById(userId).get();
-
             var userKey = userInfo.get("userKey"); // 신한 API로부터 userKey를 받아옴
-            userEntity.setUserKey(userKey.toString()); // 받아온 userKey를 유저엔티티에 저장
-
-            userRepository.save(userEntity);
 
             response.put("result", true);
+            response.put("userKey", userKey);
         }
 
         return ResponseEntity
