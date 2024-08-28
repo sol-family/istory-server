@@ -7,7 +7,10 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-
+@Service
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements Filter {
 
@@ -25,7 +28,6 @@ public class JwtAuthenticationFilter implements Filter {
     private final Set<String> excludedUrls;
     private final JwtTokenService jwtTokenService;
     private final ObjectMapper objectMapper;
-
 
     public void init(FilterConfig filterConfig) throws ServletException {
 
