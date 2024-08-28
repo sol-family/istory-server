@@ -1,10 +1,14 @@
 services:
   spring-boot-application:
+    working_dir: /build
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
       - istory-spring:/var/lib/spring
+      - type: bind
+        source: .
+        target: /build
     depends_on:
       - istory-db
     ports:
