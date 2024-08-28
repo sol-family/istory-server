@@ -39,7 +39,4 @@ public class UserEntity {
     private String userProfile;
 
     private String familyKey;
-
-    @Transient
-    private String inviteCode;
 }
