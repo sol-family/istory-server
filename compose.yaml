@@ -1,0 +1,45 @@
+services:
+  spring-boot-application:
+    working_dir: /build
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - istory-spring:/var/lib/spring
+      - type: bind
+        source: .
+        target: /build
+    depends_on:
+      - istory-db
+    ports:
+      - "8080:8080"
+    networks:
+      - istory-server-network
+  istory-db:
+    image: mysql:8.0.26
+    restart: always
+    command:
+      - --lower_case_table_names=1
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    container_name: ${MYSQL_HOST}
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - istory-db:/var/lib/mysql
+    networks:
+      - istory-server-network
+
+volumes:
+  istory-db:
+  istory-spring:
+
+networks:
+  istory-server-network:
+    driver: bridge
