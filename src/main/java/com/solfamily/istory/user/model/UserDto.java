@@ -29,4 +29,14 @@ public class UserDto {
     private String userType;
 
     private String userProfile;
+
+    public UserDto(UserEntity entity){
+        this.userId = entity.getUserId();
+        this.userName = entity.getUserName();
+        this.userPhone = entity.getUserPhone();
+        this.userGender = entity.getUserGender();
+        this.userBirth = entity.getUserBirth();
+        this.userType = entity.getUserType();
+        this.userProfile = entity.getUserProfile();
+    }
 }

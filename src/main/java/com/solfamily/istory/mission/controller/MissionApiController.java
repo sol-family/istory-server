@@ -2,6 +2,7 @@ package com.solfamily.istory.mission.controller;
 
 import com.solfamily.istory.mission.model.dto.ReportDto;
 import com.solfamily.istory.mission.service.MissionService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,8 +21,8 @@ public class MissionApiController {
     private MissionService service;
 
     @PostMapping("weeklyMission")
-    public ResponseEntity<Map> getWeeklyMission(String userId) {
-        return service.getWeeklyMission(userId);
+    public ResponseEntity<Map> getWeeklyMission(HttpServletRequest request) {
+        return service.getWeeklyMission(request);
     }
 
     @PostMapping("report")
@@ -35,12 +36,12 @@ public class MissionApiController {
     }
 
     @PostMapping("roundMissions")
-    public ResponseEntity<Map> getMissionsByRound(String userId, @RequestParam(required = false,defaultValue = "0") int roundNum) {
-        return service.getMissionsByRound(userId,roundNum);
+    public ResponseEntity<Map> getMissionsByRound(HttpServletRequest request, @RequestParam(required = false,defaultValue = "0") int roundNum) {
+        return service.getMissionsByRound(request,roundNum);
     }
 
     @PostMapping("week")
-    public ResponseEntity<Map> getMissionByWeek(String userId, int roundNum,int weekNum) {
-        return service.getMissionByWeek(userId, roundNum, weekNum);
+    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, int roundNum,int weekNum) {
+        return service.getMissionByWeek(request, roundNum, weekNum);
     }
 }

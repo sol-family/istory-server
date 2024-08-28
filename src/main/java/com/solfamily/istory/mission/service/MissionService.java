@@ -1,6 +1,7 @@
 package com.solfamily.istory.mission.service;
 
 import com.google.gson.Gson;
+import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.mission.db.FamilyMissionRepository;
 import com.solfamily.istory.mission.db.MissionImgRepository;
 import com.solfamily.istory.mission.db.ReportRepository;
@@ -14,11 +15,13 @@ import com.solfamily.istory.mission.model.entity.id.ReportEntityId;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,8 +48,12 @@ public class MissionService {
     private ReportRepository reportRepository;
     @Autowired
     private MissionImgRepository missionImgRepository;
+    @Autowired
+    private JwtTokenService jwtTokenService;
 
-    public ResponseEntity<Map> getWeeklyMission(String userId) {
+    public ResponseEntity<Map> getWeeklyMission(HttpServletRequest request){
+        String userId = decryptionUserId(request);
+
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
             return errorResponse("M101");
@@ -217,7 +224,9 @@ public class MissionService {
         }
     }
 
-    public ResponseEntity<Map> getMissionsByRound(String userId, int roundNum) {
+    public ResponseEntity<Map> getMissionsByRound(HttpServletRequest request, int roundNum) {
+        String userId = decryptionUserId(request);
+
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
             return errorResponse("M401");
@@ -259,7 +268,9 @@ public class MissionService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<Map> getMissionByWeek(String userId, int roundNum, int weekNum) {
+    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, int roundNum, int weekNum) {
+        String userId = decryptionUserId(request);
+
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
             return errorResponse("M101");
@@ -336,6 +347,13 @@ public class MissionService {
         response.put("weeklyMission",weeklyMission);
         return ResponseEntity.ok(response);
     }
+
+    private String decryptionUserId(HttpServletRequest request){
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7);
+        return jwtTokenService.getUserIdByClaims(token);
+    }
+
 
     private Map<Long,MissionEntity> getMissionMap() throws Exception{
         Gson gson = new Gson();
