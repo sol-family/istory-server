@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 public class JwtTokenService {
     @Value("${JWT_SECRET_KEY}")
-    private static String secretKey;
+    private String secretKey;
 
     // 토큰 발행
     public String create(

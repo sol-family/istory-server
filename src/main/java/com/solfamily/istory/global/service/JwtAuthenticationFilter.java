@@ -7,6 +7,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements Filter {
-
-    private final String secretKey = "your-secret-key"; // 설정한 비밀키 입력
+    @Value("${JWT_SECRET_KEY}")
+    private String secretKey; // 설정한 비밀키 입력
 
     // 예외 처리할 URL 리스트
     private final Set<String> excludedUrls;
