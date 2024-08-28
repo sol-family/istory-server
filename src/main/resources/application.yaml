@@ -1,18 +1,21 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env[.properties]  # .env 파일에서 환경 변수 가져오기 (optional)
   jpa:
     show-sql: true
     properties:
       format_sql: true
-      dialect: org.hibernate.dialect.MySQL8Dialect
+      dialect: org.hibernate.dialect.MySQL8Dialect  # Hibernate의 MySQL 8 버전 다이얼렉트 설정
     hibernate:
-      ddl-auto: update
+      ddl-auto: update  # 스키마 자동 업데이트 설정
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD}
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL 연결 URL
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 드라이버 클래스
+    username: root  # 데이터베이스 사용자명
+    password: ${MYSQL_ROOT_PASSWORD}  # 데이터베이스 비밀번호 (환경 변수에서 가져옴)
   mvc:
     servlet:
-      path: /api/v1
+      path: /api/v1  # Spring MVC 서블릿 경로 설정
+  redis:
+    host: localhost  # Redis 호스트
+    port: 6379  # Redis 포트

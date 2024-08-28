@@ -1,18 +1,18 @@
 package com.solfamily.istory.user.service;
 
 import com.solfamily.istory.Family.db.FamilyRepository;
-import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.service.FamilyService;
 import com.solfamily.istory.user.db.UserRepository;
-import com.solfamily.istory.global.configure.JsonParser;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.global.service.PasswordService;
+import com.solfamily.istory.user.model.LoginRequest;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
 import com.solfamily.istory.global.service.ShinhanApiService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -64,10 +64,10 @@ public class UserService {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            var hashedUserPw = passwordService.hashPassword(userPw); // 유저 비밀번호 암호화
+            String hashedUserPw = passwordService.hashPassword(userPw); // 유저 비밀번호 암호화
             userDto.setUserPw(hashedUserPw); // 암호화된 비밀번호로 재저장
 
-            var userEntity = userConverterService.toEntity(userDto); // userDto를 userEntity로 변환
+            UserEntity userEntity = userConverterService.toEntity(userDto); // userDto를 userEntity로 변환
 
             userEntity.setUserKey(shinhanSignUpResult.getBody().get("userKey").toString()); // userEntity에 userKey 저장
             userEntity.setJoinDate(LocalDateTime.now()); // 회원가입 일시 저장
@@ -95,10 +95,10 @@ public class UserService {
     private ResponseEntity<Map<String, Object>> checkId(String userId) {
         Map<String, Object> response = new HashMap<>();
 
-        var userEntity = userRepository.findById(userId); // 아이스토리 DB에서 유저 아이디 조회
+        Optional<UserEntity> optionalUserEntity = userRepository.findById(userId); // 아이스토리 DB에서 유저 아이디 조회
 
-        // 조회된 아이디가 없으면
-        if (userEntity.isPresent()) {
+        // 조회된 아이디가 있으면
+        if (optionalUserEntity.isPresent()) {
             String errorCode = "S1";
             response.put("result", false);
             response.put("errorCode", errorCode);
@@ -138,12 +138,14 @@ public class UserService {
 
     // 유저 로그인
     public ResponseEntity<Map<String, Object>> userLogin(
-            String userId,
-            String userPw
+        LoginRequest loginRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        var optionalEntity = userRepository.findById(userId); // 아이스토리 DB로부터 유저아이디 조회
+        String userId = loginRequest.getUserId();
+        String userPw = loginRequest.getUserPw();
+
+        Optional<UserEntity> optionalEntity = userRepository.findById(userId); // 아이스토리 DB로부터 유저아이디 조회
 
         // 아이스토리 DB에 로그인 요청한 아이디가 존재하지 않는다면
         if (optionalEntity.isEmpty()) {
@@ -156,7 +158,7 @@ public class UserService {
         }
         
         // DB에 userId가 있으면
-        var userEntity = optionalEntity.get();
+        UserEntity userEntity = optionalEntity.get();
 
         // DB 내부에 저장된 해싱된 비밀번호와 원본 비밀번호 비교하여 같다면
         if (passwordService.checkPassword(userPw, userEntity.getUserPw())) {
@@ -276,7 +278,7 @@ public class UserService {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(userId); // 아이스토리 DB에 유저아이디가 존재하는지 조회
 
         // 아이스토리 db에 아이디가 존재하지 않는다면
-        if (optionalUserEntity.isEmpty()) {
+        if (optionalUserEntity.isPresent()) {
             String errorCode = "I0";
             response.put("result", false);
             response.put("errorCode", errorCode);
@@ -284,7 +286,10 @@ public class UserService {
             UserEntity userEntity = optionalUserEntity.get();
 
             response.put("result", true);
-            response.put("userEntity", userEntity);
+
+            // userEntity에서 userDto로 변환
+            UserDto userDto = userConverterService.toDto(userEntity);
+            response.put("userDto", userDto);
         }
 
         return ResponseEntity
