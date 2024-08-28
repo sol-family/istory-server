@@ -15,13 +15,13 @@ import com.solfamily.istory.mission.model.entity.id.ReportEntityId;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
+import com.solfamily.istory.user.service.UserConverterService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,6 +50,8 @@ public class MissionService {
     private MissionImgRepository missionImgRepository;
     @Autowired
     private JwtTokenService jwtTokenService;
+    @Autowired
+    private UserConverterService userConverterService;
 
     public ResponseEntity<Map> getWeeklyMission(HttpServletRequest request){
         String userId = decryptionUserId(request);
@@ -91,7 +93,7 @@ public class MissionService {
 
         List<UserDto> member = new ArrayList<>();
         for (UserEntity entity : userEntityList.get()) {
-            member.add(new UserDto(entity));
+            member.add(userConverterService.toDto(entity));
         }
 
         weeklyMission.setMember(member);
@@ -304,7 +306,7 @@ public class MissionService {
 
         List<UserDto> member = new ArrayList<>();
         for (UserEntity entity : userEntityList.get()) {
-            member.add(new UserDto(entity));
+            member.add(userConverterService.toDto(entity));
         }
 
         weeklyMission.setMember(member);
