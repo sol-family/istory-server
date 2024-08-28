@@ -19,4 +19,18 @@ public class UserConverterService {
                 .userProfile(userEntity.getUserProfile())
                 .build();
     };
+
+    public UserEntity toEntity(UserDto userDto) {
+
+        return UserEntity.builder()
+                .userId(userDto.getUserId())
+                .userPw(userDto.getUserPw())
+                .userName(userDto.getUserName())
+                .userPhone(userDto.getUserPhone())
+                .userGender(userDto.getUserGender())
+                .userBirth(userDto.getUserBirth())
+                .userType(userDto.getUserType())
+                .userProfile(userDto.getUserProfile())
+                .build();
+    };
 }

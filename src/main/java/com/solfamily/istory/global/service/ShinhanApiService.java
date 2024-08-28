@@ -28,9 +28,10 @@ public class ShinhanApiService {
     private static String institutionTransactionUniqueNo = "20240101121212123456";
 
     // 사용자 계정 생성
-    public Map<String, Object> userJoin(
+    public Map<String, Object> signUp(
             String userId
     ) {
+        try {
         Map<String, Object> userInfo = new HashMap<>();
 
         HttpClient client = HttpClient.newHttpClient();
@@ -43,24 +44,24 @@ public class ShinhanApiService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://finopenapi.ssafy.io/ssafy/api/v1/member")) // 요청을 보낼 URL
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonInputString))
+                .header("Content-Type", "application/json") // 컨텐츠 타입 = JSON 타입
+                .POST(HttpRequest.BodyPublishers.ofString(jsonInputString)) // POST 방식으로 request 보냄
                 .build();
-        try {
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-//          System.out.println("Response Code: " + response.statusCode());
-//          System.out.println("Response Body: " + response.body());
+            log.info("Response Code: {}", response.statusCode());
+            log.info("Response Body: {}", response.body());
 
             // JSON 파싱
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.body());
             String userKey = rootNode.path("userKey").asText(); // userKey 추출
-//          log.info("userKey : {}" , userKey);
             userInfo.put("userKey", userKey);
 
             return userInfo;
         } catch (Exception e) {
+            log.info("ErrorName : {}, ErrorMsg : {}" , e.getClass(), e.getMessage());
             return null;
         }
     }
