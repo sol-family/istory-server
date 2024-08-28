@@ -1,5 +1,6 @@
 package com.solfamily.istory.user.controller;
 
+import com.solfamily.istory.user.model.LoginRequest;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.Family.service.FamilyService;
 import com.solfamily.istory.user.service.UserService;
@@ -30,12 +31,10 @@ public class UserApiController {
     // 유저 로그인
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> userLogin(
-            @RequestParam(required = true, value = "userId")
-            String userId,
-            @RequestParam(required = true, value = "userPw")
-            String userPw
+        @RequestBody
+        LoginRequest loginRequest
     ) {
-        return userService.userLogin(userId, userPw);
+        return userService.userLogin(loginRequest);
     }
 
     // 유저 상태 확인
