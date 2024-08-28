@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -34,7 +35,7 @@ public class MissionApiController {
     }
 
     @PostMapping("roundMissions")
-    public ResponseEntity<Map> getMissionsByRound(String userId, int roundNum) {
+    public ResponseEntity<Map> getMissionsByRound(String userId, @RequestParam(required = false,defaultValue = "0") int roundNum) {
         return service.getMissionsByRound(userId,roundNum);
     }
 

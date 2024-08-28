@@ -18,6 +18,8 @@ public interface FamilyMissionRepository extends JpaRepository<FamilyMissionEnti
     @Query("UPDATE FamilyMissionEntity f SET f.complete = ?1 WHERE f.familymissionNo = ?2")
     int updateCompleteByFamilyMissionNo(int complete, long familyMissionNo);
 
+    long countByFamilyKey(String familyKey);
+
     @Query(value = "select fm from FamilyMissionEntity fm where fm.familyKey = ?1 order by fm.registDate")
     Page<FamilyMissionEntity> findByFamilyKeyOrderByRegistDate(String familyKey, Pageable pageable);
 
