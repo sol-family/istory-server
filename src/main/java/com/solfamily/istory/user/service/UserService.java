@@ -178,9 +178,9 @@ public class UserService {
 
                 // 만약 가족의 대표자 아이디와 로그인한 유저의 아이디가 같지 않다면
                 if (!repesentiveUserId.equals(userEntity.getUserId())) {
-                    response.put("isPresent", false); // 대표자가 아님
+                    response.put("isRepresentor", false); // 대표자가 아님
                 } else {
-                    response.put("isPresent", true); // 같다면
+                    response.put("isRepresentor", true); // 같다면
                 }
             }
 
