@@ -9,9 +9,7 @@ import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,28 +20,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FamilyService {
 
     private final UserRepository userRepository;
     private final ShinhanApiService shinhanApiService;
     private final FamilyRepository familyRepository;
     private final JwtTokenService jwtTokenService;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final HashOperations<String, String, String> hashOperations;
-
-    @Autowired
-    public FamilyService(UserRepository userRepository,
-                         ShinhanApiService shinhanApiService,
-                         FamilyRepository familyRepository,
-                         JwtTokenService jwtTokenService,
-                         RedisTemplate<String, Object> redisTemplate) {
-        this.userRepository = userRepository;
-        this.shinhanApiService = shinhanApiService;
-        this.familyRepository = familyRepository;
-        this.jwtTokenService = jwtTokenService;
-        this.redisTemplate = redisTemplate;
-        this.hashOperations = redisTemplate.opsForHash(); // 생성자에서 초기화
-    }
+    private final HashOperations<String, String, String> hashOperations; // Redis의 HashOperations 빈 주입
 
     public ResponseEntity<Map<String, Object>> getInviteCode(
             HttpServletRequest request
