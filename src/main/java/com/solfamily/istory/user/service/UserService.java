@@ -138,7 +138,7 @@ public class UserService {
 
     // 유저 로그인
     public ResponseEntity<Map<String, Object>> userLogin(
-        LoginRequest loginRequest
+            LoginRequest loginRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
@@ -150,13 +150,14 @@ public class UserService {
         // 아이스토리 DB에 로그인 요청한 아이디가 존재하지 않는다면
         if (optionalEntity.isEmpty()) {
             String errorCode = "I0";
+            log.info("userId: {}", userId);
             response.put("result", false);
             response.put("errorCode", errorCode);
             return ResponseEntity
                     .status(HttpStatus.OK) // 200 OK
                     .body(response); // 내부적으로 정한 에러코드 (DB에 요청한 userId가 존재하지 않을 때 = I0 )
         }
-        
+
         // DB에 userId가 있으면
         UserEntity userEntity = optionalEntity.get();
 
@@ -201,7 +202,7 @@ public class UserService {
     }
 
     public ResponseEntity<Map<String, Object>> getUserStatus(
-        HttpServletRequest request
+            HttpServletRequest request
     ) {
         Map<String, Object> response = new HashMap<>();
 
@@ -278,7 +279,7 @@ public class UserService {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(userId); // 아이스토리 DB에 유저아이디가 존재하는지 조회
 
         // 아이스토리 db에 아이디가 존재하지 않는다면
-        if (optionalUserEntity.isPresent()) {
+        if (optionalUserEntity.isEmpty()) {
             String errorCode = "I0";
             response.put("result", false);
             response.put("errorCode", errorCode);
