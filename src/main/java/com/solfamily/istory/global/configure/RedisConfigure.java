@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -12,16 +13,21 @@ import org.springframework.data.redis.core.RedisTemplate;
 public class RedisConfigure {
 
     @Bean
-    public RedisTemplate<String, InvitedUserInfo> redisTemplateForUserInfo(RedisConnectionFactory redisConnectionFactory) {
+    public RedisConnectionFactory redisConnectionFactory () {
+        return new LettuceConnectionFactory();
+    }
+
+    @Bean
+    public RedisTemplate<String, InvitedUserInfo> redisTemplateForUserInfo() {
         RedisTemplate<String, InvitedUserInfo> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }
 
     @Bean
-    public RedisTemplate<String, String> redisTemplateForUserId(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, String> redisTemplateForUserId() {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }
 
