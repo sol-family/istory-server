@@ -35,7 +35,13 @@ services:
       - istory-db:/var/lib/mysql
     networks:
       - istory-server-network
-
+  redis:
+    image: redis:7.4.0
+    container_name: ${REDIS_HOST}
+    ports:
+      - 6379:6379
+    networks:
+      - istory-server-network
 volumes:
   istory-db:
   istory-spring:
