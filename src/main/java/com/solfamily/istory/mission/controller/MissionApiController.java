@@ -26,8 +26,8 @@ public class MissionApiController {
     }
 
     @PostMapping("report")
-    public ResponseEntity<Map> updateReport(@RequestBody ReportDto report) {
-        return service.updateReportByEntity(report);
+    public ResponseEntity<Map> updateReport(HttpServletRequest request,@RequestBody ReportDto report) {
+        return service.updateReportByEntity(request, report);
     }
 
     @PostMapping("missionImg")

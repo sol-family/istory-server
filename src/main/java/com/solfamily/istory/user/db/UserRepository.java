@@ -1,7 +1,9 @@
 package com.solfamily.istory.user.db;
 
 import com.solfamily.istory.user.model.UserEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -18,5 +20,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     String findUserNameByUserId(String userId);
 
-    String findFamilyKeyByUserId(String userId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE user u  SET u.userProfile = :systemname WHERE u.userId = :userId")
+    int updateProfileByUserId(String userId, String systemname);
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -58,4 +59,10 @@ public class UserApiController {
     public ResponseEntity<Map<String, Object>> getAllUser() {
         return userService.getAllUser();
     }
+
+    @PostMapping("/profile")
+    public ResponseEntity<Map<String, Object>> updateUserProfile(HttpServletRequest request, MultipartFile image){
+        return userService.updateProfile(request,image);
+    }
+
 }
