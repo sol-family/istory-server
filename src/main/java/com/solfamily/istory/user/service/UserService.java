@@ -150,7 +150,6 @@ public class UserService {
         // 아이스토리 DB에 로그인 요청한 아이디가 존재하지 않는다면
         if (optionalEntity.isEmpty()) {
             String errorCode = "I0";
-            log.info("userId: {}", userId);
             response.put("result", false);
             response.put("errorCode", errorCode);
             return ResponseEntity
