@@ -30,6 +30,6 @@ public class FamilyController {
             @RequestBody
             InviteCodeRequest inviteCodeRequest
     ) {
-        return familyService.getRepresentiveName(inviteCodeRequest);
+        return familyService.getRepresentativeName(inviteCodeRequest);
     }
 }

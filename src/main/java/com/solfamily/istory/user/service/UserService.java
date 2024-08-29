@@ -1,6 +1,7 @@
 package com.solfamily.istory.user.service;
 
 import com.solfamily.istory.Family.db.FamilyRepository;
+import com.solfamily.istory.Family.model.InvitedUserInfo;
 import com.solfamily.istory.Family.service.FamilyService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.global.service.JwtTokenService;
@@ -38,8 +39,8 @@ public class UserService {
     private final PasswordService passwordService;
     private final ShinhanApiService shinhanApiService;
     private final JwtTokenService jwtTokenService;
-    private final HashOperations<String, String, String> hashOperations; // Redis의 HashOperations 빈 주입
-
+    private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
+    private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
 
     // 회원가입
     public ResponseEntity<Map<String, Object>> signUp(
@@ -171,25 +172,31 @@ public class UserService {
             LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(30); // 토큰 만료 시간 설정 (30분)
             String jwtToken = jwtTokenService.create(claims, expiredAt); // 토큰 생성
 
+            String familyKey = userEntity.getFamilyKey();
+
+            boolean isRepresentative = false;
+
             // 만약 패밀리키가 없다면
-            if (!(Boolean) hasFamily(userEntity.getUserId()).getBody().get("hasFamily")) {
-                response.put("isPresent", false); // 대표자가 아님
-            } else { // 패밀리카 있다면
-                String familyKey = userEntity.getFamilyKey();
-                String repesentiveUserId = familyRepository.findById(familyKey).get().getRepesentiveUserId(); // 가족의 대표자 아이디를 DB에서 가져옴
+            if (familyKey == null) {
+                String inviteCode = invitedUserIdHashOperations.get(userId, "inviteCode");
+
+                if(inviteCode != null) {
+                    InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
+                    String representativeUserId = userInfo.getRepresentativeId();
+                    isRepresentative = representativeUserId.equals(userEntity.getUserId());
+                }
+            } else { // 패밀리키카 있다면
+                String representativeUserId = familyRepository.findById(familyKey).get().getRepesentiveUserId();
 
                 // 만약 가족의 대표자 아이디와 로그인한 유저의 아이디가 같지 않다면
-                if (!repesentiveUserId.equals(userEntity.getUserId())) {
-                    response.put("isRepresentor", false); // 대표자가 아님
-                } else {
-                    response.put("isRepresentor", true); // 같다면
-                }
+                isRepresentative = representativeUserId.equals(userEntity.getUserId());
             }
 
             // response 생성
             response.put("result", true);
             response.put("userId", userEntity.getUserId());
             response.put("jwtToken", jwtToken); // 응답에 jwtToken 저장
+            response.put("isRepresentative", isRepresentative); // 대표자가 아님
 
         } else { // 비밀번호가 일치하지 않으면
             String errorCode = "P0";
