@@ -48,4 +48,4 @@ volumes:
 
 networks:
   istory-server-network:
-    driver: bridge00
+    driver: bridge
