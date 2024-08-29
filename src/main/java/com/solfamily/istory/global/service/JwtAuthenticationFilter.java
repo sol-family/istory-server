@@ -35,6 +35,9 @@ public class JwtAuthenticationFilter implements Filter {
         // 예외 URL 추가
         excludedUrls.add("/api/v1/user/sign-up");
         excludedUrls.add("/api/v1/user/login");
+        excludedUrls.add("/api/v1/dummy/people");
+        excludedUrls.add("/api/v1/dummy/familyMission");
+        excludedUrls.add("/api/v1/user/all-inquire");
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {

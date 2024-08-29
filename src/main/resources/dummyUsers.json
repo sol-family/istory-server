@@ -1,0 +1,42 @@
+[
+  {
+    "userId": "apple09@ssafy.com",
+    "userPw": "qwer1234@@",
+    "userName": "김사과",
+    "userPhone": "010-1234-5678",
+    "userGender": "남자",
+    "userBirth": "1980-01-31",
+    "userType": "parent",
+    "userProfile" : ""
+  },
+  {
+    "userId": "banana09@ssafy.com",
+    "userPw": "qwer1234@@",
+    "userName": "반하나",
+    "userPhone": "010-5678-1234",
+    "userGender": "여자",
+    "userBirth": "1983-01-31",
+    "userType": "parent",
+    "userProfile" : ""
+  },
+  {
+    "userId": "cherry09@ssafy.com",
+    "userPw": "qwer1234@@",
+    "userName": "김체리",
+    "userPhone": "010-6478-1234",
+    "userGender": "남자",
+    "userBirth": "2010-05-31",
+    "userType": "child",
+    "userProfile" : ""
+  },
+  {
+    "userId": "peach09@ssafy.com",
+    "userPw": "qwer1234@@",
+    "userName": "김복숭",
+    "userPhone": "010-5378-1344",
+    "userGender": "여자",
+    "userBirth": "2015-01-31",
+    "userType": "child",
+    "userProfile" : ""
+  }
+]
