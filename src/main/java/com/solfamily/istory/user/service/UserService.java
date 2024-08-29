@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -37,6 +38,7 @@ public class UserService {
     private final PasswordService passwordService;
     private final ShinhanApiService shinhanApiService;
     private final JwtTokenService jwtTokenService;
+    private final HashOperations<String, String, String> hashOperations; // Redis의 HashOperations 빈 주입
 
 
     // 회원가입
@@ -224,8 +226,8 @@ public class UserService {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
-        } else { // 패밀리키가 있다면, 가족 계좌 있는지 확인하고 결과값 반환
-            return familyService.hasSavingsAccount(userId);
+        } else { // 초대코드가 있는지 확인
+            return familyService.hasInviteCode(userId);
         }
     }
 
@@ -247,9 +249,10 @@ public class UserService {
         String FamilyKey = userEntity.getFamilyKey();
 
         // 저장된 패밀리키가 없다면
-        if (FamilyKey == null) {
+        if (FamilyKey == null  || FamilyKey.equals("")) {
             response.put("result", false);
             response.put("hasFamily", false);
+            familyService.hasInviteCode(userId);
         } else { // 저장된 패밀리카 있다면
             response.put("result", true);
             response.put("hasFamily", true);

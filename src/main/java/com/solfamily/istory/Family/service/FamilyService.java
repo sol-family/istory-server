@@ -9,6 +9,7 @@ import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.NotFound;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,19 +61,11 @@ public class FamilyService {
                     .body(response);
         }
 
-        // 패밀리키 업데이트 하고 DB에 userEntity 저장
-        UserEntity userEntity = optionalUserEntity.get();
-        userEntity.setFamilyKey(familyKey);
-        userRepository.save(userEntity);
-
-        // Redis에 inviteCode를 키로, familyKey를 값으로 저장
+        // Redis에 inviteCode를 키로, familyKey와 대표자 id를 저장 (초대코드를 발급하는 사람이 대표자)
         hashOperations.put(inviteCode, "familyKey", familyKey);
+        hashOperations.put(inviteCode, "representiveId", userId);
 
-        // family 레코드 생성 -> 해당 가족의 패밀리키와 대표자 userId 저장
-        FamilyEntity familyEntity = new FamilyEntity();
-        familyEntity.setFamilyKey(familyKey);
-        familyEntity.setRepesentiveUserId(userId);
-        familyRepository.save(familyEntity);
+        hashOperations.put(userId, "inviteCode", inviteCode);
 
         // 응답 생성
         response.put("result", true);
@@ -88,21 +81,8 @@ public class FamilyService {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String familyKey = hashOperations.get(inviteCodeRequest.getInviteCoode(), "familyKey");
-        Optional<FamilyEntity> optionalFamilyEntity = familyRepository.findById(familyKey);
-
-        // 해당 패밀리키를 가진 가족이 아이스토리 db에 존재하지 않을때
-        if(optionalFamilyEntity.isEmpty()) {
-            String errorCode = "F0"; // 해당 패밀리키를 가진 가족이 아이스토리 db에 존재하지 않을때 = F0
-            response.put("result", false);
-            response.put("errorCode", errorCode);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(response);
-        }
-
-        // 대표자 userId를 아이스토리 db로부터 가져옴
-        String representiveUserId = familyRepository.findRepresentiveIdByFamilyKey(familyKey);
+        // redis에서 대표자 아이디 가져옴
+        String representiveUserId = hashOperations.get(inviteCodeRequest.getInviteCoode(), "representiveId");
 
         // 대표자 이름을 아이스토리 db로부터 가져옴
         String representiveName = userRepository.findUserNameByUserId(representiveUserId);
@@ -115,29 +95,31 @@ public class FamilyService {
                 .body(response);
     }
 
-    public ResponseEntity<Map<String, Object>> hasSavingsAccount(
+    public ResponseEntity<Map<String, Object>> hasInviteCode(
             String userId
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String familyKey = userRepository.findById(userId).get().getFamilyKey();
+        String familyKey = userRepository.findFamilyKeyByUserId(userId);
 
-        String savingsAccount = familyRepository.findById(familyKey).get().getSavingsAccountNo();
+        // 패밀리키가 존재하지 않는다면, 아직 가족이 확정되지 않은 상태
+        if(familyKey == null) {
+            String inviteCode = hashOperations.get(userId, "inviteCode");
 
-        // 가족계좌가 존재하지 않는다면, 아직 가족이 확정되지 않은 상태
-        if (savingsAccount == null) {
-            response.put("hasFamily", true);
-            response.put("inviteCode", ""); // redis 작업 후 redis에 familyKey로 접근해서 inviteCode 받아오기
-            response.put("hasSavingsAccount", false);
+            response.put("hasFamily", false);
+            // inviteCode가 없으면 초대코드 페이지로, 있으면 가족구성준비 페이지로
+            response.put("inviteCode", inviteCode == null ? "" : inviteCode); // redis에 userId로 접근해서 inviteCode 받아오기
         } else {
+            // 패밀리키가 존재한다면 가족구성완료
             response.put("hasFamily", true);
-            response.put("hasSavingsAccount", true);
+            response.put("inviteCode", "");
         }
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
     }
+
 
 
 }

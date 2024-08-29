@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     Optional<List<UserEntity>> findUsersByFamilyKey(String familyKey);
 
     String findUserNameByUserId(String userId);
+
+    String findFamilyKeyByUserId(String userId);
 }
