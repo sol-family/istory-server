@@ -60,7 +60,7 @@ public class UserService {
         ResponseEntity<Map<String, Object>> checkIdResult = checkId(userId);
 
         // 아이스토리 DB에 중복된 아이디가 있을 때
-        if (!(Boolean) checkIdResult.getBody().get("result")) {
+        if (!Boolean.parseBoolean(checkIdResult.getBody().get("result").toString())) {
             return checkIdResult;
         }
 
@@ -193,7 +193,7 @@ public class UserService {
             if (familyKey == null) {
                 String inviteCode = invitedUserIdHashOperations.get(userId, "inviteCode");
 
-                if(inviteCode != null) {
+                if (inviteCode != null) {
                     InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
                     String representativeUserId = userInfo.getRepresentativeId();
                     isRepresentative = representativeUserId.equals(userEntity.getUserId());
@@ -236,19 +236,7 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findById(userId).get();
 
-        ResponseEntity<Map<String, Object>> hasFamilyResponse = hasFamily(userId);
-
-        // 만약 패밀리키가 없다면
-        if (!(Boolean) hasFamilyResponse.getBody().get("hasFamily")) {
-            response.put("hasFamily", false);
-            response.put("inviteCode", "");
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(response);
-        } else { // 초대코드가 있는지 확인
-            return familyService.hasInviteCode(userId);
-        }
+        return hasFamily(userId);
     }
 
     private ResponseEntity<Map<String, Object>> hasFamily(
@@ -258,7 +246,8 @@ public class UserService {
         ResponseEntity<Map<String, Object>> getUserResponse = getUser(userId);
 
         // 아이스토리 DB에 해당 아이디가 존재하지 않는다면
-        if (!(Boolean) getUserResponse.getBody().get("result")) {
+        if (!Boolean.parseBoolean(getUserResponse.getBody().get("result").toString())) {
+            System.out.println(getUserResponse.getBody().get("result").toString());
             return getUserResponse;
         }
 
@@ -266,15 +255,13 @@ public class UserService {
         UserEntity userEntity = (UserEntity) getUserResponse.getBody().get("userEntity");
 
         // userEntity 값에 저장된 패밀리키를 받아옴
-        String FamilyKey = userEntity.getFamilyKey();
+        String familyKey = userEntity.getFamilyKey();
 
-        // 저장된 패밀리키가 없다면
-        if (FamilyKey == null  || FamilyKey.equals("")) {
-            response.put("result", false);
+        // 저장된 패밀리키가 없다면, 가족 구성이 확정되지 않음
+        if (familyKey == null || familyKey.equals("")) {
             response.put("hasFamily", false);
-            familyService.hasInviteCode(userId);
-        } else { // 저장된 패밀리카 있다면
-            response.put("result", true);
+            response.put("inviteCode", familyService.hasInviteCode(userId));
+        } else { // 저장된 패밀리카 있다면, 가족 구성이 확정됨
             response.put("hasFamily", true);
         }
 
@@ -381,17 +368,17 @@ public class UserService {
         if (image == null || image.isEmpty()) { // image.isEmpty()로 파일이 비어있는지 확인
             return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPF"));// Userservice Update File RegistError
         }
-        ResponseEntity<Map> upLoadImgResponse =  fileService.uploadImg(image);
+        ResponseEntity<Map> upLoadImgResponse = fileService.uploadImg(image);
         String systemname = upLoadImgResponse.getBody().get("systemname").toString();
-        if(systemname == null||systemname.equals("")){
+        if (systemname == null || systemname.equals("")) {
             return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPU")); // Userservice Update Profile UploadError
         }
-        if(userRepository.updateProfileByUserId(userId,systemname)==1){
+        if (userRepository.updateProfileByUserId(userId, systemname) == 1) {
             Map<String, Object> response = new HashMap<>();
             response.put("result", true);
             response.put("profile", systemname);
             return ResponseEntity.ok(response);
-        }else{
+        } else {
             return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPR")); // Userservice Update Profile RegistError
         }
     }

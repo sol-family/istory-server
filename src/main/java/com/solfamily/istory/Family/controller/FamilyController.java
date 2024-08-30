@@ -1,6 +1,7 @@
 package com.solfamily.istory.Family.controller;
 
 import com.solfamily.istory.Family.model.InviteCodeRequest;
+import com.solfamily.istory.Family.model.SavingsRequest;
 import com.solfamily.istory.Family.service.FamilyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class FamilyController {
         return familyService.getInviteCode(request);
     }
 
-    @GetMapping("/invite-code-represent")
+    @PostMapping("/invite-code-represent")
     public ResponseEntity<Map<String, Object>> getRepresentativeName(
             @RequestBody
             InviteCodeRequest inviteCodeRequest
@@ -68,9 +69,11 @@ public class FamilyController {
     @PostMapping("/confirm-family")
     public ResponseEntity<Map<String, Object>> confirmFamily(
             @RequestBody
-            InviteCodeRequest inviteCodeRequest
+            InviteCodeRequest inviteCodeRequest,
+            @RequestBody
+            SavingsRequest savingsRequest
     ) {
-        return familyService.confirmFamily(inviteCodeRequest);
+        return familyService.confirmFamily(inviteCodeRequest, savingsRequest);
     }
 
 }

@@ -61,7 +61,8 @@ public class JwtAuthenticationFilter implements Filter {
         String authorizationHeader = httpRequest.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            String errorCode = "J6"; // 토큰 값이 없는 경우
+            sendErrorResponse(httpResponse, errorCode);
             return;
         }
 
