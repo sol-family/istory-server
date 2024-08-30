@@ -231,7 +231,6 @@ public class FamilyService {
             String errorCode = "R1"; // 필드가 비어 있는 경우의 에러 코드
             response.put("result", false);
             response.put("errorCode", errorCode);
-            response.put("errorMessage", "필드가 비어 있습니다.");
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
@@ -243,7 +242,6 @@ public class FamilyService {
             String errorCode = "R2"; // 기타 Redis 관련 에러
             response.put("result", false);
             response.put("errorCode", errorCode);
-            response.put("errorMessage", "Redis 작업 중 알 수 없는 오류가 발생했습니다.");
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
