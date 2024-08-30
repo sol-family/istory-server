@@ -31,7 +31,7 @@ public class MissionApiController {
     }
 
     @PostMapping("missionImg")
-    public ResponseEntity<Map> registMissionImg(long familymissionNo, MultipartFile missionImg) {
+    public ResponseEntity<Map> registMissionImg(String familymissionNo, MultipartFile missionImg) {
         return service.registMissionImg(familymissionNo,missionImg);
     }
 
