@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SavingsRequest {
+public class WithdrawalRequest {
 
-    private String savingsAccountNo;
+    private String withdrawalAccountNo;
+    private long depositBalance;
 }

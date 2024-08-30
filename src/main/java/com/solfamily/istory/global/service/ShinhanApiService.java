@@ -23,6 +23,8 @@ import java.util.*;
 public class ShinhanApiService {
     @Value("${SHINHAN_API_KEY}")
     private String apiKey;
+    @Value(("${SAVINGS_PRODUCT_CODE}"))
+    private String accountTypeUniqueNo;
     private static String apiName = "inquireSavingsProducts";
     private static String transmissionDate = "20240101";
     private static String transmissionTime = "121212";
@@ -109,10 +111,9 @@ public class ShinhanApiService {
     }
 
     // 적금 계좌 생성
-    public String createSavingAccount(
+    public String createSavingsAccount(
             String userKey,
             String withdrawalAccountNo,
-            String accountTypeUniqueNo,
             long depositBalance
     ) {
         try {

@@ -1,7 +1,7 @@
 package com.solfamily.istory.Family.controller;
 
 import com.solfamily.istory.Family.model.InviteCodeRequest;
-import com.solfamily.istory.Family.model.SavingsRequest;
+import com.solfamily.istory.Family.model.WithdrawalRequest;
 import com.solfamily.istory.Family.service.FamilyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -68,12 +68,13 @@ public class FamilyController {
 
     @PostMapping("/confirm-family")
     public ResponseEntity<Map<String, Object>> confirmFamily(
+            HttpServletRequest request,
             @RequestBody
             InviteCodeRequest inviteCodeRequest,
             @RequestBody
-            SavingsRequest savingsRequest
+            WithdrawalRequest withdrawalRequest
     ) {
-        return familyService.confirmFamily(inviteCodeRequest, savingsRequest);
+        return familyService.confirmFamily(request, inviteCodeRequest, withdrawalRequest);
     }
 
 }

@@ -3,9 +3,10 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
-import com.solfamily.istory.Family.model.SavingsRequest;
+import com.solfamily.istory.Family.model.WithdrawalRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
+import com.solfamily.istory.global.service.ShinhanApiService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 
@@ -27,6 +29,7 @@ public class FamilyService {
     private final FamilyRepository familyRepository;
     private final JwtTokenService jwtTokenService;
     private final UserConverterService userConverterService;
+    private final ShinhanApiService shinhanApiService;
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
 
@@ -225,8 +228,6 @@ public class FamilyService {
                     .body(response);
 
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-
             // Redis 작업에서 필드가 비어 있을 때 발생하는 예외 처리
             String errorCode = "R1"; // 필드가 비어 있는 경우의 에러 코드
             response.put("result", false);
@@ -236,8 +237,6 @@ public class FamilyService {
                     .body(response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-
             // 기타 예상치 못한 예외 처리
             String errorCode = "R2"; // 기타 Redis 관련 에러
             response.put("result", false);
@@ -282,12 +281,35 @@ public class FamilyService {
     }
 
     public ResponseEntity<Map<String, Object>> confirmFamily(
+            HttpServletRequest request,
             InviteCodeRequest inviteCodeRequest,
-            SavingsRequest savingsRequest
+            WithdrawalRequest withdrawalRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
+        // 클라이언트로부터 jwtToken을 받아옴
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7); // 토큰 추출
+
+        // 토큰으로부터 userId 추출
+        String userId = jwtTokenService.getUserIdByClaims(token);
+
         String inviteCode = inviteCodeRequest.getInviteCode();
+
+        String userKey = userRepository.findById(userId).get().getUserKey();
+        String withdrawalAccountNo = withdrawalRequest.getWithdrawalAccountNo();
+        Long depositBalance = withdrawalRequest.getDepositBalance();
+
+        String savingsAccountNo = shinhanApiService.createSavingsAccount(userKey, withdrawalAccountNo, depositBalance);
+
+        if(savingsAccountNo.equals("")) {
+            String errorCode = "S1"; // 적금 계좌 생성 실패
+            response.put("result", false);
+            response.put("errorCode", errorCode);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(response);
+        }
 
         // redis에서 초대된 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -299,6 +321,7 @@ public class FamilyService {
         FamilyEntity familyEntity = new FamilyEntity();
         familyEntity.setFamilyKey(userInfo.getFamilyKey());
         familyEntity.setRepesentiveUserId(userInfo.getRepresentativeId());
+        familyEntity.setSavingsAccountNo(savingsAccountNo);
         familyRepository.save(familyEntity);
 
         // userId가 저장된 userIdList
@@ -306,7 +329,7 @@ public class FamilyService {
 
         // 유저마다 패밀리키 업데이트 하고 아이스토리 db에 저장
         for (int i = 0; i < userIdList.size(); i++) {
-            String userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
+            userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
             UserEntity userEntity = userRepository.findById(userId).get(); // 아이스토리 db에서 userEntity 가져옴
             userEntity.setFamilyKey(userInfo.getFamilyKey()); // 패밀리키 업데이트
             userRepository.save(userEntity); // 아이스토리 db 업데이트
