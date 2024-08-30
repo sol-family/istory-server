@@ -2,6 +2,8 @@ package com.solfamily.istory.global.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
@@ -233,6 +238,77 @@ public class ShinhanApiService {
         } catch (Exception e) {
             // 예외 발생 시 INTERNAL_SERVER_ERROR 상태 코드로 빈 응답 반환
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<String> createSavingProduct() {
+        try {
+            Map<String, Object> result = new HashMap<>();
+            HttpClient client = HttpClient.newHttpClient();
+
+            String requestUrl = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/savings/createProduct";
+            String apiName = requestUrl.split("/")[requestUrl.split("/").length-1];
+            String nowDate = LocalDate.now().toString().substring(0,10).replace("-","");
+            String nowTime = LocalTime.now().toString().replaceAll("[.:]", "").substring(0,12);
+
+            Gson gson = new Gson();
+            JsonObject json = new JsonObject();
+
+            // 헤더파트
+            Map<String,String> header = new HashMap<>();
+            header.put("apiName",apiName);
+            header.put("transmissionDate", nowDate);
+            header.put("transmissionTime", nowTime.substring(0,6));
+            header.put("institutionCode","00100");
+            header.put("fintechAppNo","001");
+            header.put("apiServiceCode",apiName);
+            header.put("institutionTransactionUniqueNo",nowDate+nowTime);
+            header.put("apiKey",apiKey);
+
+
+            json.add("Header",gson.toJsonTree(header));
+            json.add("bankCode",gson.toJsonTree("001"));
+            json.add("accountName",gson.toJsonTree("istory적금"));
+            json.add("accountDescription",gson.toJsonTree("365일 1년 istory적금입니다"));
+            json.add("subscriptionPeriod",gson.toJsonTree("365"));
+            json.add("minSubscriptionBalance",gson.toJsonTree("2"));
+            json.add("maxSubscriptionBalance",gson.toJsonTree("2"));
+            json.add("interestRate",gson.toJsonTree("3.0"));
+            json.add("rateDescription",gson.toJsonTree("기본 3.0%/n" +
+                    "30주 달성 시, + 0.2% 우대 금리/n" +
+                    "40주 달성 시, + 0.4% 우대 금리/n" +
+                    "50주 달성 시, + 0.6% 우대 금리"));
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(requestUrl)) // 요청을 보낼 URL
+                    .header("Content-Type", "application/json") // 컨텐츠 타입 = JSON 타입
+                    .POST(HttpRequest.BodyPublishers.ofString(json.toString())) // POST 방식으로 request 보냄
+                    .build();
+            System.out.println(json);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            log.info("SHINHAN_API_KEY: {}", apiKey);
+            log.info("Response Code: {}", response.statusCode());
+            log.info("Response Body: {}", response.body());
+
+            // JSON 파싱
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(response.body());
+            Iterator<Map.Entry<String,JsonNode>> list =rootNode.fields();
+            while(list.hasNext()){
+                Map.Entry<String,JsonNode> temp = list.next();
+                result.put(temp.getKey(),temp.getValue());
+            }
+
+            // 응답 상태 코드와 본문을 그대로 클라이언트에 반환
+            return new ResponseEntity<>(response.body(), HttpStatus.valueOf(response.statusCode()));
+        } catch (Exception e) {
+            log.info("ErrorName : {}, ErrorMsg : {}" , e.getClass(), e.getMessage());
+
+            // 예외 발생 시 INTERNAL_SERVER_ERROR 상태 코드로 빈 응답 반환
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("");
         }
     }
 

@@ -18,7 +18,6 @@ import java.util.Map;
 public class UserApiController {
 
     private final UserService userService;
-    private final FamilyService familyService;
 
     // 회원가입
     @PostMapping("/sign-up")

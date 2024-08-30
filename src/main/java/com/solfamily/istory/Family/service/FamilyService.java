@@ -3,6 +3,7 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
+import com.solfamily.istory.Family.model.SavingsRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
 import com.solfamily.istory.user.db.UserRepository;
@@ -85,7 +86,7 @@ public class FamilyService {
         Map<String, Object> response = new HashMap<>();
 
         // redis에서 가족구성원 정보 객체 받아옴
-        InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCodeRequest.getInviteCoode(), "userInfo");
+        InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCodeRequest.getInviteCode(), "userInfo");
 
         if (userInfo == null) {
             String errorCode = "R0"; // redis 가족구성원 정보 관련 에러 발생
@@ -107,30 +108,17 @@ public class FamilyService {
                 .body(response);
     }
 
-    public ResponseEntity<Map<String, Object>> hasInviteCode(
+    public String hasInviteCode(
             String userId
     ) {
-        Map<String, Object> response = new HashMap<>();
+        // redis에 userId로 접근해서 inviteCode 받아오기
+        String inviteCode = invitedUserIdHashOperations.get(userId, "inviteCode");
 
-        String familyKey = userRepository.findFamilyKeyByUserId(userId).getFamilyKey();
+        System.out.println(inviteCode);
 
-        // 패밀리키가 존재하지 않는다면, 아직 가족이 확정되지 않은 상태
-        if (familyKey == null) {
-            String inviteCode = invitedUserIdHashOperations.get(userId, "inviteCode");
-
-            response.put("hasFamily", false);
-            // inviteCode가 없으면 초대코드 페이지로, 있으면 가족구성준비 페이지로
-            response.put("inviteCode", inviteCode == null ? "" : inviteCode); // redis에 userId로 접근해서 inviteCode 받아오기
-        } else {
-            // 패밀리키가 존재한다면 가족구성완료
-            response.put("hasFamily", true);
-            response.put("inviteCode", "");
-        }
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return inviteCode == null ? "" : inviteCode;
     }
+
 
     public ResponseEntity<Map<String, Object>> acceptInvite(
             HttpServletRequest request,
@@ -145,11 +133,12 @@ public class FamilyService {
         // 토큰으로부터 userId 추출
         String userId = jwtTokenService.getUserIdByClaims(token);
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에 가족구성원 유저 아이디 업데이트
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
         userInfo.getMemberId().add(userId);
+        userInfoHashOperations.put(inviteCode, "userInfo", userInfo);
 
         // 레디스에 userId를 주식별자로 한 레코드 생성
         invitedUserIdHashOperations.put(userId, "inviteCode", inviteCode);
@@ -166,7 +155,7 @@ public class FamilyService {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에서 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -203,34 +192,62 @@ public class FamilyService {
             InviteCodeRequest inviteCodeRequest
     ) {
         Map<String, Object> response = new HashMap<>();
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
-        // redis에서 가족구성원 정보 객체를 받아옴
-        InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
+        try {
+            // redis에서 가족구성원 정보 객체를 받아옴
+            InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode,"userInfo");
 
-        // 가족구성원 정보가 redis에 존재하지 않으면
-        if (userInfo == null) {
-            String errorCode = "R0"; // redis 가족구성원 정보 관련 에러 발생
+            // 가족구성원 정보가 redis에 존재하지 않으면
+            if (userInfo == null) {
+                String errorCode = "R0"; // redis 가족구성원 정보가 redis에 존재하지 않을때
+                response.put("result", false);
+                response.put("errorCode", errorCode);
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(response);
+            }
+
+            // 초대 코드에 해당하는 정보 삭제
+            userInfoHashOperations.delete(inviteCode, "userInfo");
+
+            List<String> userIdList = userInfo.getMemberId();
+
+            // 각 userId에 대해 Redis에서 정보 삭제
+            for (String userId : userIdList) {
+                System.out.println(userId);
+                invitedUserIdHashOperations.delete(userId, "inviteCode");
+            }
+
+            response.put("result", true);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(response);
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+
+            // Redis 작업에서 필드가 비어 있을 때 발생하는 예외 처리
+            String errorCode = "R1"; // 필드가 비어 있는 경우의 에러 코드
             response.put("result", false);
             response.put("errorCode", errorCode);
+            response.put("errorMessage", "필드가 비어 있습니다.");
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            // 기타 예상치 못한 예외 처리
+            String errorCode = "R2"; // 기타 Redis 관련 에러
+            response.put("result", false);
+            response.put("errorCode", errorCode);
+            response.put("errorMessage", "Redis 작업 중 알 수 없는 오류가 발생했습니다.");
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
         }
-
-        userInfoHashOperations.delete(inviteCode);
-
-        List<String> userIdList = userInfo.getMemberId();
-
-        for (int i = 0; i < userIdList.size(); i++) {
-            String userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
-            invitedUserIdHashOperations.delete(userId); // redis에 존재하는 userId를 주식별자로 한 레코드를 하나씩 삭제
-        }
-
-        response.put("result", true);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
     }
 
     public ResponseEntity<Map<String, Object>> excludeUser(
@@ -246,10 +263,10 @@ public class FamilyService {
         // 토큰으로부터 userId 추출
         String userId = jwtTokenService.getUserIdByClaims(token);
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis 저장된 userId 주식별자로 가지는 레코드를 삭제
-        invitedUserIdHashOperations.delete(userId);
+        invitedUserIdHashOperations.delete(userId, "inviteCode");
 
         // redis에 저장된 inviteCode 주식별자로 가지는 레코드의 userId value 삭제 후 업데이트
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -267,11 +284,12 @@ public class FamilyService {
     }
 
     public ResponseEntity<Map<String, Object>> confirmFamily(
-            InviteCodeRequest inviteCodeRequest
+            InviteCodeRequest inviteCodeRequest,
+            SavingsRequest savingsRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에서 초대된 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -293,8 +311,7 @@ public class FamilyService {
             String userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
             UserEntity userEntity = userRepository.findById(userId).get(); // 아이스토리 db에서 userEntity 가져옴
             userEntity.setFamilyKey(userInfo.getFamilyKey()); // 패밀리키 업데이트
-
-            userRepository.save(userEntity);
+            userRepository.save(userEntity); // 아이스토리 db 업데이트
         }
 
         response.put("result", true);
