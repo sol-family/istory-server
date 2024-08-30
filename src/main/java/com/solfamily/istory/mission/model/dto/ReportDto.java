@@ -2,9 +2,13 @@ package com.solfamily.istory.mission.model.dto;
 
 import com.solfamily.istory.mission.model.entity.ReportEntity;
 import com.solfamily.istory.user.model.UserDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReportDto {
     private UserDto user;
     private Long familymissionNo;

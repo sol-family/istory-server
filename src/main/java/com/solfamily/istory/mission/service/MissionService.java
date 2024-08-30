@@ -1,6 +1,7 @@
 package com.solfamily.istory.mission.service;
 
 import com.google.gson.Gson;
+import com.solfamily.istory.global.service.FileService;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.mission.db.FamilyMissionRepository;
 import com.solfamily.istory.mission.db.MissionImgRepository;
@@ -18,11 +19,11 @@ import com.solfamily.istory.user.model.UserEntity;
 import com.solfamily.istory.user.service.UserConverterService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,14 +33,10 @@ import com.google.gson.reflect.TypeToken;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 public class MissionService {
-    @Value("${FILE_DIRECTORY}")
-    private String saveFolder;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -52,19 +49,21 @@ public class MissionService {
     private JwtTokenService jwtTokenService;
     @Autowired
     private UserConverterService userConverterService;
+    @Autowired
+    private FileService fileService;
 
     public ResponseEntity<Map> getWeeklyMission(HttpServletRequest request){
         String userId = decryptionUserId(request);
 
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
-            return errorResponse("M101");
+            return errorResponse("MWM0");
         }
         String date = LocalDateTime.now().toString().substring(0, 10);
 
         Optional<FamilyMissionEntity> familyMissionEntity = familyMissionRepository.findByRegistDateLessThanEqualAndExpirationDateGreaterThanEqualAndFamilyKey(date, date, familyKey.get());
         if (familyMissionEntity.isEmpty()) {
-            return errorResponse("M102");
+            return errorResponse("MWM1");
         }
 
         FamilyMissionDto weeklyMission = new FamilyMissionDto();
@@ -75,7 +74,7 @@ public class MissionService {
             System.out.println(getMissionMap());
             missionEntity = getMissionMap().get(familyMissionEntity.get().getMissionNo());
         }catch (Exception e){
-            return errorResponse("M103");
+            return errorResponse("MWM2");
         }
         weeklyMission.setMissionNo(missionEntity.getMissionNo());
         weeklyMission.setMissionContents(missionEntity.getContents());
@@ -88,7 +87,7 @@ public class MissionService {
 
         Optional<List<UserEntity>> userEntityList = userRepository.findUsersByFamilyKey(familyKey.get());
         if (userEntityList.isEmpty()) {
-            return errorResponse("M104");
+            return errorResponse("MWM3");
         }
 
         List<UserDto> member = new ArrayList<>();
@@ -100,7 +99,7 @@ public class MissionService {
 
         Optional<Integer> temp = familyMissionRepository.getWeeklyNum(familyKey.get(), date);
         if (temp.isEmpty()) {
-            return errorResponse("M105");
+            return errorResponse("MWM4");
         }
         int weeklyNum = (temp.get()%52==0)?52:temp.get()%52;
 
@@ -121,7 +120,7 @@ public class MissionService {
             for (UserDto user : member) {
                 Optional<ReportEntity> entity = reportRepository.findById(new ReportEntityId(user.getUserId(), familyMissionEntity.get().getFamilymissionNo()));
                 if (entity.isEmpty()) {
-                    return errorResponse("M106");
+                    return errorResponse("MWM5");
                 }
                 reports.put(user.getUserId(), new ReportDto(entity.get(), user));
             }
@@ -130,10 +129,8 @@ public class MissionService {
         boolean showCheck = reports.get(userId).getComplete() == 1;
 
         Optional<MissionImgEntity> missionImg =  missionImgRepository.findByFamilymissionNo(familyMissionEntity.get().getFamilymissionNo());
-        String missionImgSystemname;
-        if (missionImg.isEmpty()) {
-            missionImgSystemname = "";
-        }else{
+        String missionImgSystemname = "";
+        if (missionImg.isPresent()) {
             missionImgSystemname = (missionImg.get().getSystemname()==null)?"":missionImg.get().getSystemname();
         }
 
@@ -145,84 +142,38 @@ public class MissionService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<Map> updateReportByEntity(ReportDto report) {
+    public ResponseEntity<Map> updateReportByEntity(HttpServletRequest request, ReportDto report) {
         String thoughts = report.getThoughts();
         String writeDate = LocalDateTime.now().toString().replace("T", " ").substring(0, 19);
-        String userId = report.getUser().getUserId();
+        String userId = decryptionUserId(request);
+        int complete = report.getComplete();
         long familymissionNo = report.getFamilymissionNo();
-        if (reportRepository.updateByUserIdAndFamilyMissionNo(thoughts, writeDate, 1, userId, familymissionNo) == 1) {
+        if (reportRepository.updateByUserIdAndFamilyMissionNo(thoughts, writeDate, complete, userId, familymissionNo) == 1) {
             return ResponseEntity.ok(Collections.singletonMap("result", "true"));
         } else {
-            return ResponseEntity.ok(Collections.singletonMap("result", "false"));
+            return errorResponse("MUPR");
         }
     }
 
     public ResponseEntity<Map> registMissionImg(long familyMissionNo, MultipartFile missionImg) {
         if (missionImg == null) {
-            return errorResponse("M301");
+            return errorResponse("MRIF");
         }
         try {
             MissionImgEntity missionImgEntity = new MissionImgEntity();
             missionImgEntity.setFamilymissionNo(familyMissionNo);
             String orgName = missionImg.getOriginalFilename();
             missionImgEntity.setOriginname(orgName);
-
-            int lastIdx = orgName.lastIndexOf(".");
-            String extension = orgName.substring(lastIdx);
-
-            if(!(extension.equals(".png")||extension.equals(".jpg")||extension.equals(".jpeg"))){
-                return errorResponse("M302");
+            String systemname = fileService.uploadImg(missionImg).getBody().get("systemname").toString();
+            if(systemname==null|| systemname.isEmpty()){
+                return errorResponse("MIUE");
             }
-
-            LocalDateTime now = LocalDateTime.now();
-            String time = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-            String systemname = time + UUID.randomUUID() + extension;
             missionImgEntity.setSystemname(systemname);
-            String path = saveFolder+systemname;
             missionImgRepository.save(missionImgEntity);
             missionImgRepository.deleteMissionImgEntitiesNotMatchingSystemname(systemname,familyMissionNo);
-            missionImg.transferTo(new File(path));
-
             return ResponseEntity.ok(Collections.singletonMap("result", "true"));
         }catch (Exception e){
-            return ResponseEntity.ok(Collections.singletonMap("result", "false"));
-        }
-    }
-
-    public ResponseEntity<Map> createMissionsByFamilyKey(String familyKey, String startDate) {
-        try {
-            List<MissionEntity> missionList = new ArrayList<>(getMissionMap().values());
-            Collections.shuffle(missionList);
-            List<MissionEntity> randomMissions = missionList.stream().limit(52).toList();
-
-            String dateFormatType = "yyyy-MM-dd";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormatType);
-            Date date = simpleDateFormat.parse(startDate);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-
-            String registDate = startDate;
-            String endDate;
-            for (MissionEntity mission : randomMissions) {
-                cal.add(Calendar.DAY_OF_MONTH, 6);
-                endDate = simpleDateFormat.format(cal.getTime());
-
-                FamilyMissionEntity familyMissionEntity = new FamilyMissionEntity();
-                familyMissionEntity.setFamilyKey(familyKey);
-                familyMissionEntity.setMissionNo(mission.getMissionNo());
-                familyMissionEntity.setFamilyKey(familyKey);
-                familyMissionEntity.setRegistDate(registDate);
-                familyMissionEntity.setExpirationDate(endDate);
-                familyMissionEntity.setComplete(0);
-                familyMissionRepository.save(familyMissionEntity);
-
-                familyMissionRepository.save(familyMissionEntity);
-                cal.add(Calendar.DAY_OF_MONTH, 1);
-                registDate = simpleDateFormat.format(cal.getTime());
-            }
-            return ResponseEntity.ok(Collections.singletonMap("success", "true"));
-        } catch (Exception e) {
-            return errorResponse("");
+            return  errorResponse("MRME");
         }
     }
 
@@ -231,7 +182,7 @@ public class MissionService {
 
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
-            return errorResponse("M401");
+            return errorResponse("MGRM");
         }
 
         if(roundNum <= 0){
@@ -275,7 +226,7 @@ public class MissionService {
 
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);
         if (familyKey.isEmpty()) {
-            return errorResponse("M101");
+            return errorResponse("MWMF");
         }
         Pageable  pageable = PageRequest.of((roundNum-1)*52+weekNum, 1);
         Page<FamilyMissionEntity> resultPage = familyMissionRepository.findByFamilyKeyOrderByRegistDate(familyKey.get(), pageable);
@@ -288,7 +239,7 @@ public class MissionService {
         try {
             missionEntity = getMissionMap().get(familyMissionEntity.getMissionNo());
         }catch (Exception e){
-            return errorResponse("M103");
+            return errorResponse("MWMM");
         }
         weeklyMission.setMissionNo(missionEntity.getMissionNo());
         weeklyMission.setMissionContents(missionEntity.getContents());
@@ -301,14 +252,13 @@ public class MissionService {
 
         Optional<List<UserEntity>> userEntityList = userRepository.findUsersByFamilyKey(familyKey.get());
         if (userEntityList.isEmpty()) {
-            return errorResponse("M104");
+            return errorResponse("MWMU");
         }
 
         List<UserDto> member = new ArrayList<>();
         for (UserEntity entity : userEntityList.get()) {
             member.add(userConverterService.toDto(entity));
         }
-
         weeklyMission.setMember(member);
 
         int order = familyMissionEntity.getComplete();
@@ -327,7 +277,7 @@ public class MissionService {
             for (UserDto user : member) {
                 Optional<ReportEntity> entity = reportRepository.findById(new ReportEntityId(user.getUserId(), familyMissionEntity.getFamilymissionNo()));
                 if (entity.isEmpty()) {
-                    return errorResponse("M106");
+                    return errorResponse("MWMR");
                 }
                 reports.put(user.getUserId(), new ReportDto(entity.get(), user));
             }
@@ -335,10 +285,8 @@ public class MissionService {
         weeklyMission.setReports(reports);
 
         Optional<MissionImgEntity> missionImg =  missionImgRepository.findByFamilymissionNo(familyMissionEntity.getFamilymissionNo());
-        String missionImgSystemname;
-        if (missionImg.isEmpty()) {
-            missionImgSystemname = "";
-        }else{
+        String missionImgSystemname="";
+        if (missionImg.isPresent()) {
             missionImgSystemname = (missionImg.get().getSystemname()==null)?"":missionImg.get().getSystemname();
         }
 
@@ -350,12 +298,71 @@ public class MissionService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<Map> createMissionsByFamilyKey(String familyKey, String startDate) {
+        try {
+            List<MissionEntity> missionList = new ArrayList<>(getMissionMap().values());
+            Collections.shuffle(missionList);
+            List<MissionEntity> randomMissions = missionList.stream().limit(52).toList();
+
+            String dateFormatType = "yyyy-MM-dd";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormatType);
+            Date date = simpleDateFormat.parse(startDate);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+
+            String registDate = startDate;
+            String endDate;
+            for (MissionEntity mission : randomMissions) {
+                cal.add(Calendar.DAY_OF_MONTH, 6);
+                endDate = simpleDateFormat.format(cal.getTime());
+
+                FamilyMissionEntity familyMissionEntity = new FamilyMissionEntity();
+                familyMissionEntity.setFamilyKey(familyKey);
+                familyMissionEntity.setMissionNo(mission.getMissionNo());
+                familyMissionEntity.setFamilyKey(familyKey);
+                familyMissionEntity.setRegistDate(registDate);
+                familyMissionEntity.setExpirationDate(endDate);
+                familyMissionEntity.setComplete(0);
+                familyMissionRepository.save(familyMissionEntity);
+
+                familyMissionRepository.save(familyMissionEntity);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+                registDate = simpleDateFormat.format(cal.getTime());
+            }
+            return ResponseEntity.ok(Collections.singletonMap("success", "true"));
+        } catch (Exception e) {
+            return errorResponse("creatMissionError");
+        }
+    }
+
+    @Scheduled(cron="0 0 0 * * *")
+    public void checkAndCompleteMissions(){
+        String expirationDate = LocalDate.now().minusDays(1).toString().substring(0, 10);
+        List<Long> familyMissionNoList = familyMissionRepository.checkFamilyMissionList(expirationDate);
+        if (!familyMissionNoList.isEmpty()) {
+            for (Long familymissionNo : familyMissionNoList) {
+                boolean flag = true;
+                List<ReportEntity> reportList = reportRepository.findAllByFamilyMissionNo(familymissionNo);
+                for(ReportEntity reportEntity : reportList){
+                    if(reportEntity.getComplete()!=2){
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    if(missionImgRepository.findByFamilymissionNo(familymissionNo).isPresent()){
+                        familyMissionRepository.updateCompleteByFamilyMissionNo(2, familymissionNo);
+                    }
+                }
+            }
+        }
+    }
+
     private String decryptionUserId(HttpServletRequest request){
         String authorizationHeader = request.getHeader("Authorization");
         String token = authorizationHeader.substring(7);
         return jwtTokenService.getUserIdByClaims(token);
     }
-
 
     private Map<Long,MissionEntity> getMissionMap() throws Exception{
         Gson gson = new Gson();
@@ -374,6 +381,6 @@ public class MissionService {
     }
 
     private ResponseEntity<Map> errorResponse(String msg) {
-        return ResponseEntity.ok(Collections.singletonMap("errorMsg", msg));
+        return ResponseEntity.ok(Collections.singletonMap("errorCode", msg));
     }
 }

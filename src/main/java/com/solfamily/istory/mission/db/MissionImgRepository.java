@@ -15,5 +15,5 @@ public interface MissionImgRepository extends JpaRepository<MissionImgEntity, St
     @Modifying
     @Transactional
     @Query("DELETE FROM MissionImgEntity m WHERE m.systemname != :systemname AND m.familymissionNo = :familyMissionNo")
-    void deleteMissionImgEntitiesNotMatchingSystemname(@Param("systemname") String systemname, @Param("familyMissionNo") Long familyMissionNo);
+    int deleteMissionImgEntitiesNotMatchingSystemname(@Param("systemname") String systemname, @Param("familyMissionNo") Long familyMissionNo);
 }
