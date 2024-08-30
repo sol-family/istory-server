@@ -3,6 +3,7 @@ package com.solfamily.istory.user.service;
 import com.solfamily.istory.Family.db.FamilyRepository;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
 import com.solfamily.istory.Family.service.FamilyService;
+import com.solfamily.istory.global.service.FileService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.global.service.PasswordService;
@@ -19,12 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -41,6 +40,7 @@ public class UserService {
     private final JwtTokenService jwtTokenService;
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
+    private final FileService fileService;
 
     // 회원가입
     public ResponseEntity<Map<String, Object>> signUp(
@@ -358,5 +358,28 @@ public class UserService {
         return ResponseEntity
                 .status(HttpStatus.OK) // 200 OK
                 .body(response);
+    }
+
+    public ResponseEntity<Map<String, Object>> updateProfile(HttpServletRequest request, MultipartFile image) {
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7); // 토큰 추출
+        String userId = jwtTokenService.getUserIdByClaims(token);
+
+        if (image == null || image.isEmpty()) { // image.isEmpty()로 파일이 비어있는지 확인
+            return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPF"));// Userservice Update File RegistError
+        }
+        ResponseEntity<Map> upLoadImgResponse =  fileService.uploadImg(image);
+        String systemname = upLoadImgResponse.getBody().get("systemname").toString();
+        if(systemname == null||systemname.equals("")){
+            return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPU")); // Userservice Update Profile UploadError
+        }
+        if(userRepository.updateProfileByUserId(userId,systemname)==1){
+            Map<String, Object> response = new HashMap<>();
+            response.put("result", true);
+            response.put("profile", systemname);
+            return ResponseEntity.ok(response);
+        }else{
+            return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPR")); // Userservice Update Profile RegistError
+        }
     }
 }
