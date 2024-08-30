@@ -16,6 +16,7 @@ spring:
   mvc:
     servlet:
       path: /api/v1  # Spring MVC 서블릿 경로 설정
-  redis:
-    host: ${REDIS_HOST}  # Redis 호스트
-    port: 6379  # Redis 포트
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
