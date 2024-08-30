@@ -51,7 +51,6 @@ public class SavingsService {
         return shinhanApiService.createSavingsAccount(
                 userKey,
                 withdrawalAccountNo,
-                accountTypeUniqueNo,
                 depositBalance
         );
     }

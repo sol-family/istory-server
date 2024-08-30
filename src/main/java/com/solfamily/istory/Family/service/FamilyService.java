@@ -228,8 +228,6 @@ public class FamilyService {
                     .body(response);
 
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-
             // Redis 작업에서 필드가 비어 있을 때 발생하는 예외 처리
             String errorCode = "R1"; // 필드가 비어 있는 경우의 에러 코드
             response.put("result", false);
@@ -239,8 +237,6 @@ public class FamilyService {
                     .body(response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-
             // 기타 예상치 못한 예외 처리
             String errorCode = "R2"; // 기타 Redis 관련 에러
             response.put("result", false);
@@ -307,7 +303,12 @@ public class FamilyService {
         String savingsAccountNo = shinhanApiService.createSavingsAccount(userKey, withdrawalAccountNo, depositBalance);
 
         if(savingsAccountNo.equals("")) {
-            return null;
+            String errorCode = "S1"; // 적금 계좌 생성 실패
+            response.put("result", false);
+            response.put("errorCode", errorCode);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(response);
         }
 
         // redis에서 초대된 가족구성원 정보 객체를 받아옴
@@ -328,7 +329,7 @@ public class FamilyService {
 
         // 유저마다 패밀리키 업데이트 하고 아이스토리 db에 저장
         for (int i = 0; i < userIdList.size(); i++) {
-            String userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
+            userId = userIdList.get(i); // redis에서 가져온 userIdList에서 userId를 하나씩 가져옴
             UserEntity userEntity = userRepository.findById(userId).get(); // 아이스토리 db에서 userEntity 가져옴
             userEntity.setFamilyKey(userInfo.getFamilyKey()); // 패밀리키 업데이트
             userRepository.save(userEntity); // 아이스토리 db 업데이트
