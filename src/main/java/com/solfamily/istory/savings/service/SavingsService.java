@@ -43,15 +43,11 @@ public class SavingsService {
     }
 
     // 적금 계좌 생성
-    public ResponseEntity<Map<String,String>> createSavingsAccount(
-            HttpServletRequest request,
+    public String createSavingsAccount(
+            String userKey,
             String withdrawalAccountNo,
             long depositBalance
     ) {
-        String authorizationHeader = request.getHeader("Authorization");
-        String token = authorizationHeader.substring(7); // 토큰 추출
-        String userId = jwtTokenService.getUserIdByClaims(token);
-        String userKey = userRepository.findById(userId).get().getUserKey();
         return shinhanApiService.createSavingAccount(userKey,
                 withdrawalAccountNo,accountTypeUniqueNo, depositBalance);
     }

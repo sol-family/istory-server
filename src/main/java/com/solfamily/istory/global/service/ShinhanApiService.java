@@ -16,10 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -112,7 +109,7 @@ public class ShinhanApiService {
     }
 
     // 적금 계좌 생성
-    public ResponseEntity<Map<String,String>> createSavingAccount(
+    public String createSavingAccount(
             String userKey,
             String withdrawalAccountNo,
             String accountTypeUniqueNo,
@@ -161,16 +158,17 @@ public class ShinhanApiService {
 
             // JSON 파싱
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(response.body());
-            Iterator<Map.Entry<String,JsonNode>> list =rootNode.fields();
-            while(list.hasNext()){
-                Map.Entry<String,JsonNode> temp = list.next();
-                result.put(temp.getKey(),temp.getValue());
+            Map<String, Object> responseData = objectMapper.readValue(response.body(), Map.class);
+
+            Map<String,Object> headerDate = (Map<String, Object>) responseData.get("Header");
+            if(!headerDate.get("responseCode").equals("H0000")){
+                return "";
             }
-            return ResponseEntity.ok(Collections.singletonMap("result","true"));
+            String accountNo = (String)((Map<String, Object>) responseData.get("REC")).get("accountNo");
+            return accountNo;
         } catch (Exception e) {
             log.info("ErrorName : {}, ErrorMsg : {}" , e.getClass(), e.getMessage());
-            return null;
+            return "";
         }
     }
 

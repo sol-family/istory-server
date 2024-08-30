@@ -16,13 +16,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SavingsController {
     private final SavingsService savingsService;
-    // 적금 계좌 생성
-    @PostMapping("/savingsaccount")
-    public  ResponseEntity<Map<String,String>> createSavingsAccount(
-            HttpServletRequest request,
-            String withdrawalAccountNo,
-            long depositBalance)
-    {
-        return savingsService.createSavingsAccount(request, withdrawalAccountNo, depositBalance);
-    }
+//    // 적금 계좌 생성
+//    @PostMapping("/savingsaccount")
+//    public  ResponseEntity<Map<String,String>> createSavingsAccount(
+//            HttpServletRequest request,
+//            String withdrawalAccountNo,
+//            long depositBalance)
+//    {
+//        return savingsService.createSavingsAccount(request, withdrawalAccountNo, depositBalance);
+//    }
 }
