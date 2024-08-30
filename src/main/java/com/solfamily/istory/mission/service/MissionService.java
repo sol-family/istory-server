@@ -155,13 +155,14 @@ public class MissionService {
         }
     }
 
-    public ResponseEntity<Map> registMissionImg(long familyMissionNo, MultipartFile missionImg) {
+    public ResponseEntity<Map> registMissionImg(String familyMissionNo, MultipartFile missionImg) {
         if (missionImg == null) {
             return errorResponse("MRIF");
         }
         try {
+            long familyMissionNoLong = Long.parseLong(familyMissionNo);
             MissionImgEntity missionImgEntity = new MissionImgEntity();
-            missionImgEntity.setFamilymissionNo(familyMissionNo);
+            missionImgEntity.setFamilymissionNo(familyMissionNoLong);
             String orgName = missionImg.getOriginalFilename();
             missionImgEntity.setOriginname(orgName);
             String systemname = fileService.uploadImg(missionImg).getBody().get("systemname").toString();
@@ -170,7 +171,7 @@ public class MissionService {
             }
             missionImgEntity.setSystemname(systemname);
             missionImgRepository.save(missionImgEntity);
-            missionImgRepository.deleteMissionImgEntitiesNotMatchingSystemname(systemname,familyMissionNo);
+            missionImgRepository.deleteMissionImgEntitiesNotMatchingSystemname(systemname,familyMissionNoLong);
             return ResponseEntity.ok(Collections.singletonMap("result", "true"));
         }catch (Exception e){
             return  errorResponse("MRME");
