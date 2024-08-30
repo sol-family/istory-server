@@ -2,6 +2,8 @@ package com.solfamily.istory.global.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,18 +66,31 @@ public class JwtAuthenticationFilter implements Filter {
             jwtTokenService.validation(token);
             filterChain.doFilter(request, response); // 다음 필터 또는 컨트롤러로 요청 전달
         } catch (Exception e) {
-            String errorCode;
-
-            if (e instanceof SignatureException) {
-                errorCode = "J0"; // 토큰 서명 조작 에러
-            } else if (e instanceof ExpiredJwtException) {
-                errorCode = "J1"; // 토큰 유효기간 만료 에러
-            } else {
-                errorCode = "J2"; // 토큰 검증 관련 알 수 없는 에러
-            }
+            String errorCode = getExceptionInfo(e);
 
             sendErrorResponse(httpResponse, errorCode);
         }
+    }
+
+    private static String getExceptionInfo(Exception e) {
+        String errorCode;
+
+        e.printStackTrace();
+
+        if (e instanceof SignatureException) {
+            errorCode = "J0"; // 토큰 서명 조작 에러
+        } else if (e instanceof ExpiredJwtException) {
+            errorCode = "J1"; // 토큰 유효기간 만료 에러
+        } else if (e instanceof MalformedJwtException) {
+            errorCode = "J2"; // 토큰 형식 오류 에러
+        } else if (e instanceof UnsupportedJwtException) {
+            errorCode = "J3"; // 지원하지 않는 토큰 에러
+        } else if (e instanceof IllegalArgumentException) {
+            errorCode = "J4"; // 잘못된 인자 에러 (토큰이 null이거나 빈 문자열인 경우)
+        } else {
+            errorCode = "J5"; // 토큰 검증 관련 알 수 없는 에러
+        }
+        return errorCode;
     }
 
     private void sendErrorResponse(HttpServletResponse response, String errorCode) throws IOException {
@@ -94,4 +108,3 @@ public class JwtAuthenticationFilter implements Filter {
         response.getWriter().write(jsonResponse);
     }
 }
-
