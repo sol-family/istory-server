@@ -1,4 +1,4 @@
-package com.solfamily.istory.Family.model;
+package com.solfamily.istory.shinhan.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

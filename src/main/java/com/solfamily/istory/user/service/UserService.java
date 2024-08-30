@@ -7,14 +7,13 @@ import com.solfamily.istory.Family.db.FamilyRepository;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
 import com.solfamily.istory.Family.service.FamilyService;
 import com.solfamily.istory.global.service.FileService;
-import com.solfamily.istory.savings.service.SavingsService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.global.service.PasswordService;
 import com.solfamily.istory.user.model.LoginRequest;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
-import com.solfamily.istory.global.service.ShinhanApiService;
+import com.solfamily.istory.shinhan.service.ShinhanApiService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,6 @@ public class UserService {
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
     private final FileService fileService;
-    private final SavingsService savingsService;
 
     // 회원가입
     public ResponseEntity<Map<String, Object>> signUp(
@@ -402,7 +400,7 @@ public class UserService {
         List<String> list = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         for(Map<String, String> map : randomAccounts){
-            ResponseEntity<Map> result = savingsService.createWithdrawalAccount(userKey,map.get("accountTypeUniqueNo"));
+            ResponseEntity<Map<String, Object>> result = shinhanApiService.createWithdrawalAccount(userKey,map.get("accountTypeUniqueNo"));
             if(!result.getBody().containsKey("errorCode")){
                 Map<String, Object> resultMap = objectMapper.convertValue(result.getBody().get("Header"), Map.class);
                 if(resultMap.get("responseCode").equals("H0000")){
@@ -412,7 +410,7 @@ public class UserService {
         }
         for(String accountNo : list){
             System.out.println(accountNo);
-            savingsService.insertCashByAccountNo(userKey,accountNo);
+            shinhanApiService.insertCashByAccountNo(userKey,accountNo);
         }
     }
 
@@ -422,7 +420,7 @@ public class UserService {
         String userId = jwtTokenService.getUserIdByClaims(token);
 
         String userKey = userRepository.findById(userId).get().getUserKey();
-        ResponseEntity<Map> response = shinhanApiService.inquireDemandDepositAccountList(userKey);
+        ResponseEntity<Map<String, Object>> response = shinhanApiService.inquireDemandDepositAccountList(userKey);
         if(response == null){
                return ResponseEntity.ok(Collections.singletonMap("errorCode", "UGAL"));
         }
