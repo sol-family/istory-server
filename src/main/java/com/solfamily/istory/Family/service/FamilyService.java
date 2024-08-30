@@ -3,10 +3,10 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
-import com.solfamily.istory.Family.model.WithdrawalRequest;
+import com.solfamily.istory.shinhan.model.WithdrawalRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
-import com.solfamily.istory.global.service.ShinhanApiService;
+import com.solfamily.istory.shinhan.service.ShinhanApiService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
@@ -17,7 +17,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 

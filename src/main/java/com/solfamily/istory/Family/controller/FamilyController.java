@@ -1,7 +1,7 @@
 package com.solfamily.istory.Family.controller;
 
 import com.solfamily.istory.Family.model.InviteCodeRequest;
-import com.solfamily.istory.Family.model.WithdrawalRequest;
+import com.solfamily.istory.shinhan.model.WithdrawalRequest;
 import com.solfamily.istory.Family.service.FamilyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
