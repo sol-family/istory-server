@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     String findUserNameByUserId(String userId);
 
+    String findFamilyKeyByUserId(String userId);
+
     @Transactional
     @Modifying
     @Query("UPDATE user u  SET u.userProfile = :systemname WHERE u.userId = :userId")
