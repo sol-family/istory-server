@@ -3,9 +3,10 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
-import com.solfamily.istory.Family.model.SavingsRequest;
+import com.solfamily.istory.Family.model.WithdrawalRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
+import com.solfamily.istory.global.service.ShinhanApiService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.user.model.UserDto;
 import com.solfamily.istory.user.model.UserEntity;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 
@@ -27,6 +29,7 @@ public class FamilyService {
     private final FamilyRepository familyRepository;
     private final JwtTokenService jwtTokenService;
     private final UserConverterService userConverterService;
+    private final ShinhanApiService shinhanApiService;
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
 
@@ -282,12 +285,30 @@ public class FamilyService {
     }
 
     public ResponseEntity<Map<String, Object>> confirmFamily(
+            HttpServletRequest request,
             InviteCodeRequest inviteCodeRequest,
-            SavingsRequest savingsRequest
+            WithdrawalRequest withdrawalRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
+        // 클라이언트로부터 jwtToken을 받아옴
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7); // 토큰 추출
+
+        // 토큰으로부터 userId 추출
+        String userId = jwtTokenService.getUserIdByClaims(token);
+
         String inviteCode = inviteCodeRequest.getInviteCode();
+
+        String userKey = userRepository.findById(userId).get().getUserKey();
+        String withdrawalAccountNo = withdrawalRequest.getWithdrawalAccountNo();
+        Long depositBalance = withdrawalRequest.getDepositBalance();
+
+        String savingsAccountNo = shinhanApiService.createSavingsAccount(userKey, withdrawalAccountNo, depositBalance);
+
+        if(savingsAccountNo.equals("")) {
+            return null;
+        }
 
         // redis에서 초대된 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -299,6 +320,7 @@ public class FamilyService {
         FamilyEntity familyEntity = new FamilyEntity();
         familyEntity.setFamilyKey(userInfo.getFamilyKey());
         familyEntity.setRepesentiveUserId(userInfo.getRepresentativeId());
+        familyEntity.setSavingsAccountNo(savingsAccountNo);
         familyRepository.save(familyEntity);
 
         // userId가 저장된 userIdList

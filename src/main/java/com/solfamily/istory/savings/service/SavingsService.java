@@ -48,11 +48,18 @@ public class SavingsService {
             String withdrawalAccountNo,
             long depositBalance
     ) {
-        return shinhanApiService.createSavingAccount(userKey,
-                withdrawalAccountNo,accountTypeUniqueNo, depositBalance);
+        return shinhanApiService.createSavingsAccount(
+                userKey,
+                withdrawalAccountNo,
+                accountTypeUniqueNo,
+                depositBalance
+        );
     }
 
-    public ResponseEntity<Map> createWithdrawalAccount(String userKey,String accountTypeUniqueNo){
+    public ResponseEntity<Map> createWithdrawalAccount(
+            String userKey,
+            String accountTypeUniqueNo
+    ){
         try {
             Map<String, Object> result = new HashMap<>();
             HttpClient client = HttpClient.newHttpClient();
@@ -106,7 +113,10 @@ public class SavingsService {
         }
     }
 
-    public void insertCashByAccountNo(String userKey,String accountNo){
+    public void insertCashByAccountNo(
+            String userKey,
+            String accountNo
+    ){
         try {
             Map<String, Object> result = new HashMap<>();
             HttpClient client = HttpClient.newHttpClient();
