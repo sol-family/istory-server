@@ -16,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Slf4j
@@ -122,8 +123,8 @@ public class ShinhanApiService {
 
             String requestUrl = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/savings/createAccount";
             String apiName = requestUrl.split("/")[requestUrl.split("/").length-1];
-            String nowDate = LocalDate.now().toString().substring(0,10).replace("-","");
-            String nowTime = LocalTime.now().toString().replaceAll("[.:]", "").substring(0,12);
+            String nowDate = LocalDate.now(ZoneId.of("Asia/Seoul")).toString().substring(0,10).replace("-","");
+            String nowTime = LocalTime.now(ZoneId.of("Asia/Seoul")).toString().replaceAll("[.:]", "").substring(0,12);
 
             Gson gson = new Gson();
             JsonObject json = new JsonObject();
@@ -265,8 +266,8 @@ public class ShinhanApiService {
 
             String requestUrl = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList";
             String apiName = requestUrl.split("/")[requestUrl.split("/").length-1];
-            String nowDate = LocalDate.now().toString().substring(0,10).replace("-","");
-            String nowTime = LocalTime.now().toString().replaceAll("[.:]", "").substring(0,12);
+            String nowDate = LocalDate.now(ZoneId.of("Asia/Seoul")).toString().substring(0,10).replace("-","");
+            String nowTime = LocalTime.now(ZoneId.of("Asia/Seoul")).toString().replaceAll("[.:]", "").substring(0,12);
 
             Gson gson = new Gson();
             JsonObject json = new JsonObject();
