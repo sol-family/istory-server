@@ -18,10 +18,10 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query(value = "select * from istory_user where family_key = ?1", nativeQuery = true)
     Optional<List<UserEntity>> findUsersByFamilyKey(String familyKey);
 
-    String findUserNameByUserId(String userId);
+    UserEntity findUserNameByUserId(String userId);
 
-    String findFamilyKeyByUserId(String userId);
-
+    UserEntity findFamilyKeyByUserId(String userId);
+  
     @Transactional
     @Modifying
     @Query("UPDATE user u  SET u.userProfile = :systemname WHERE u.userId = :userId")
