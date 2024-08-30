@@ -85,7 +85,7 @@ public class FamilyService {
         Map<String, Object> response = new HashMap<>();
 
         // redis에서 가족구성원 정보 객체 받아옴
-        InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCodeRequest.getInviteCoode(), "userInfo");
+        InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCodeRequest.getInviteCode(), "userInfo");
 
         if (userInfo == null) {
             String errorCode = "R0"; // redis 가족구성원 정보 관련 에러 발생
@@ -145,7 +145,7 @@ public class FamilyService {
         // 토큰으로부터 userId 추출
         String userId = jwtTokenService.getUserIdByClaims(token);
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에 가족구성원 유저 아이디 업데이트
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -166,7 +166,7 @@ public class FamilyService {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에서 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -203,7 +203,7 @@ public class FamilyService {
             InviteCodeRequest inviteCodeRequest
     ) {
         Map<String, Object> response = new HashMap<>();
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에서 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
@@ -246,7 +246,7 @@ public class FamilyService {
         // 토큰으로부터 userId 추출
         String userId = jwtTokenService.getUserIdByClaims(token);
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis 저장된 userId 주식별자로 가지는 레코드를 삭제
         invitedUserIdHashOperations.delete(userId);
@@ -271,7 +271,7 @@ public class FamilyService {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String inviteCode = inviteCodeRequest.getInviteCoode();
+        String inviteCode = inviteCodeRequest.getInviteCode();
 
         // redis에서 초대된 가족구성원 정보 객체를 받아옴
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");

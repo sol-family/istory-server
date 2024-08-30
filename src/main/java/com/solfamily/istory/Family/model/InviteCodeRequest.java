@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 public class InviteCodeRequest {
 
-    private String inviteCoode;
+    private String inviteCode;
 }
