@@ -1,9 +1,13 @@
 package com.solfamily.istory.user.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.solfamily.istory.Family.db.FamilyRepository;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
 import com.solfamily.istory.Family.service.FamilyService;
 import com.solfamily.istory.global.service.FileService;
+import com.solfamily.istory.savings.service.SavingsService;
 import com.solfamily.istory.user.db.UserRepository;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.global.service.PasswordService;
@@ -14,7 +18,6 @@ import com.solfamily.istory.global.service.ShinhanApiService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -41,6 +48,7 @@ public class UserService {
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
     private final FileService fileService;
+    private final SavingsService savingsService;
 
     // 회원가입
     public ResponseEntity<Map<String, Object>> signUp(
@@ -132,6 +140,11 @@ public class UserService {
 
             response.put("result", true);
             response.put("userKey", userKey);
+            try {
+                registAccount((String) userKey);
+            }catch (Exception e){
+                log.info("ErrorName : {}", "수시입출금 계좌 자동 생성 에러");
+            }
         }
 
         return ResponseEntity
@@ -381,5 +394,61 @@ public class UserService {
         }else{
             return ResponseEntity.ok(Collections.singletonMap("errorCode", "UUPR")); // Userservice Update Profile RegistError
         }
+    }
+
+    public void registAccount(String userKey) throws Exception {
+        Gson gson = new Gson();
+        System.setIn(new FileInputStream("src/main/resources/accountList.json"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String str = null;
+        StringBuilder sb = new StringBuilder();
+
+        while ((str = br.readLine()) != null) {
+            sb.append(str);
+        }
+
+        Type listType = new TypeToken<List<Map<String, String>>>() {
+        }.getType();
+        List<Map<String, String>> accountNameList = gson.fromJson(sb.toString(), listType);
+        Collections.shuffle(accountNameList);
+        List<Map<String, String>> randomAccounts = new ArrayList<>(accountNameList.subList(0, 3));
+        List<String> list = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        for(Map<String, String> map : randomAccounts){
+            ResponseEntity<Map> result = savingsService.createWithdrawalAccount(userKey,map.get("accountTypeUniqueNo"));
+            if(!result.getBody().containsKey("errorCode")){
+                Map<String, Object> resultMap = objectMapper.convertValue(result.getBody().get("Header"), Map.class);
+                if(resultMap.get("responseCode").equals("H0000")){
+                    list.add((String) (objectMapper.convertValue(result.getBody().get("REC"), Map.class).get("accountNo")));
+                }
+            }
+        }
+        for(String accountNo : list){
+            System.out.println(accountNo);
+            savingsService.insertCashByAccountNo(userKey,accountNo);
+        }
+    }
+
+    public ResponseEntity<Map<String, Object>> getAccountList(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7); // 토큰 추출
+        String userId = jwtTokenService.getUserIdByClaims(token);
+
+        String userKey = userRepository.findById(userId).get().getUserKey();
+        ResponseEntity<Map> response = shinhanApiService.inquireDemandDepositAccountList(userKey);
+        if(response == null){
+               return ResponseEntity.ok(Collections.singletonMap("errorCode", "UGAL"));
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> resultMap = objectMapper.convertValue(response.getBody().get("Header"), Map.class);
+        if(!resultMap.get("responseCode").equals("H0000")){
+            return ResponseEntity.ok(Collections.singletonMap("errorCode", "UGAL-shinhan"));
+        }
+        List<Map<String,Object>> accountList = objectMapper.convertValue(response.getBody().get("REC"), List.class);
+        List<String> accountNoList = new ArrayList<>();
+        for(Map<String,Object> map : accountList){
+            accountNoList.add((String) map.get("accountNo"));
+        }
+        return ResponseEntity.ok(Collections.singletonMap("accountNoList",accountNoList));
     }
 }

@@ -65,4 +65,9 @@ public class UserApiController {
         return userService.updateProfile(request,image);
     }
 
+    @GetMapping("/account")
+    public ResponseEntity<Map<String, Object>> getUserAccount(HttpServletRequest request){
+        return userService.getAccountList(request);
+    }
+
 }

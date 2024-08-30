@@ -28,7 +28,10 @@ public class DummyController {
 
     @PostMapping("shinhantest")
     public ResponseEntity<Map> shinhanTest(String userKey){
-//        return service.shinhanTest(userKey);
-        return service.shinhanAccoutList();
+        return service.shinhanTest(userKey);
+    }
+    @PostMapping("shinhantest1")
+    public ResponseEntity<Map> shinhanTest1(String userKey){
+        return service.shinhanCreateTest(userKey);
     }
 }

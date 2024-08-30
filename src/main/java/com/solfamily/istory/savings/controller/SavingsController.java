@@ -1,31 +1,28 @@
 package com.solfamily.istory.savings.controller;
 
 import com.solfamily.istory.savings.service.SavingsService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/savings")
 @RequiredArgsConstructor
 public class SavingsController {
-
     private final SavingsService savingsService;
-
-    // 적금 상품 조회
-    @RequestMapping("/inquireProducts")
-    public ResponseEntity<String> inquireProducts() {
-        return savingsService.inquireSavingsProducts();
-    }
-
     // 적금 계좌 생성
-    @RequestMapping("/createSavingAccount")
-    public  ResponseEntity<String> createSavingsAccount(
-            String accountTypeUniqueNo, // 상품고유번호
-            String depositBalance, // 가입금액
-            String withdrawalAccountNo // 출금계좌번호
-    ) {
-        return savingsService.createSavingsAccount(accountTypeUniqueNo, depositBalance, withdrawalAccountNo);
+    @PostMapping("/savingsaccount")
+    public  ResponseEntity<Map<String,String>> createSavingsAccount(
+            HttpServletRequest request,
+            String withdrawalAccountNo,
+            long depositBalance)
+    {
+        return savingsService.createSavingsAccount(request, withdrawalAccountNo, depositBalance);
     }
 }

@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter implements Filter {
         excludedUrls.add("/api/v1/user/sign-up");
         excludedUrls.add("/api/v1/user/login");
         excludedUrls.add("/api/v1/dummy/shinhantest");
+        excludedUrls.add("/api/v1/dummy/shinhantest1");
         excludedUrls.add("/api/v1/dummy/people");
         excludedUrls.add("/api/v1/dummy/familyMission");
         excludedUrls.add("/api/v1/user/all-inquire");
