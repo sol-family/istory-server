@@ -97,7 +97,7 @@ public class FamilyService {
         }
 
         // 대표자 이름을 아이스토리 db로부터 가져옴
-        String representaiveName = userRepository.findUserNameByUserId(userInfo.getRepresentativeId());
+        String representaiveName = userRepository.findUserNameByUserId(userInfo.getRepresentativeId()).getUserName();
 
         response.put("result", true);
         response.put("representaiveName", representaiveName);
@@ -112,7 +112,7 @@ public class FamilyService {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        String familyKey = userRepository.findFamilyKeyByUserId(userId);
+        String familyKey = userRepository.findFamilyKeyByUserId(userId).getFamilyKey();
 
         // 패밀리키가 존재하지 않는다면, 아직 가족이 확정되지 않은 상태
         if (familyKey == null) {
