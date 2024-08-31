@@ -3,11 +3,13 @@
 ### 개발 환경
 IDE: Intellij
 
+Build Tool : Gradle
+
 실행 환경: AWS Ubuntu
 
 ### 빌드 및 실행방법
 
-1. Project의 root directory에 다음과 같은 형식으로 .env 파일을 생성. 
+#### 1. Project의 root directory에 다음과 같은 형식으로 .env 파일을 생성. 
 ```shell
 # 신한 API의 키를 입력합니다. 이 키는 API 호출 시 필요
 SHINHAN_API_KEY=your_shinhan_api_key_here
@@ -49,19 +51,19 @@ TZ=Asia/Seoul
 FILE_DIRECTORY=your_file_directory_here
 ```
 
-2. apt update, apt upgrade
+#### 2. apt update, apt upgrade
 ```shell
   sudo apt update
   sudo apt upgrade
 ```
 
-3. docker, docker-compose 설치
+#### 3. docker, docker-compose 설치
 ```shell
   sudo apt install docker
   sudo apt install docker-compose  
 ```
 
-4. compose.yaml 생성성
+#### 4. compose.yaml 생성
 ```yaml
 # docker-compose 파일은 여러 개의 컨테이너를 정의하고 실행하는 데 사용
 services:
@@ -144,7 +146,7 @@ networks:
 
 ```
 
-5. compose.yaml 실행
+#### 5. compose.yaml 실행
 ```shell
   sudo docker-compose up --build
 ```
