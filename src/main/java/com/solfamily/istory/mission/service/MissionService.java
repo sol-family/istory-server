@@ -338,7 +338,7 @@ public class MissionService {
         }
     }
 
-    @Scheduled(cron="0 0 0 * * *")
+    @Scheduled(cron="0 0/15 0 * * *")
     public void checkAndCompleteMissions(){
         String expirationDate = LocalDate.now().minusDays(1).toString().substring(0, 10);
         List<Long> familyMissionNoList = familyMissionRepository.checkFamilyMissionList(expirationDate);

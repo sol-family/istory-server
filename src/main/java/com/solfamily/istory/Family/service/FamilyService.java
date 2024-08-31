@@ -3,6 +3,7 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
+import com.solfamily.istory.mission.service.MissionService;
 import com.solfamily.istory.shinhan.model.familyConfirmRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -31,6 +33,7 @@ public class FamilyService {
     private final ShinhanApiService shinhanApiService;
     private final HashOperations<String, String, InvitedUserInfo> userInfoHashOperations; // Redis의 HashOperations 빈 주입
     private final HashOperations<String, String, String> invitedUserIdHashOperations; // Redis의 HashOperations 빈 주입
+    private final MissionService missionService;
 
     public ResponseEntity<Map<String, Object>> getInviteCode(
             HttpServletRequest request
@@ -332,7 +335,7 @@ public class FamilyService {
             userEntity.setFamilyKey(userInfo.getFamilyKey()); // 패밀리키 업데이트
             userRepository.save(userEntity); // 아이스토리 db 업데이트
         }
-
+        missionService.createMissionsByFamilyKey(userInfo.getFamilyKey(), LocalDate.now().toString());
         response.put("result", true);
 
         return ResponseEntity
