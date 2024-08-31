@@ -222,7 +222,9 @@ public class MissionService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, int roundNum, int weekNum) {
+    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, String roundNumStr, String weekNumStr) {
+        int roundNum = Integer.parseInt(roundNumStr);
+        int weekNum = Integer.parseInt(weekNumStr);
         String userId = decryptionUserId(request);
 
         Optional<String> familyKey = userRepository.getFamilyKeyByUserId(userId);

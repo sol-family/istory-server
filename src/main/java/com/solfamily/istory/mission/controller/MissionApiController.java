@@ -41,7 +41,7 @@ public class MissionApiController {
     }
 
     @PostMapping("week")
-    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, int roundNum,int weekNum) {
+    public ResponseEntity<Map> getMissionByWeek(HttpServletRequest request, String roundNum,String weekNum) {
         return service.getMissionByWeek(request, roundNum, weekNum);
     }
 }
