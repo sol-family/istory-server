@@ -3,7 +3,7 @@ package com.solfamily.istory.Family.service;
 import com.solfamily.istory.Family.model.FamilyEntity;
 import com.solfamily.istory.Family.model.InviteCodeRequest;
 import com.solfamily.istory.Family.model.InvitedUserInfo;
-import com.solfamily.istory.shinhan.model.WithdrawalRequest;
+import com.solfamily.istory.shinhan.model.familyConfirmRequest;
 import com.solfamily.istory.global.service.JwtTokenService;
 import com.solfamily.istory.Family.db.FamilyRepository;
 import com.solfamily.istory.shinhan.service.ShinhanApiService;
@@ -281,8 +281,7 @@ public class FamilyService {
 
     public ResponseEntity<Map<String, Object>> confirmFamily(
             HttpServletRequest request,
-            InviteCodeRequest inviteCodeRequest,
-            WithdrawalRequest withdrawalRequest
+            familyConfirmRequest familyConfirmRequest
     ) {
         Map<String, Object> response = new HashMap<>();
 
@@ -293,11 +292,11 @@ public class FamilyService {
         // 토큰으로부터 userId 추출
         String userId = jwtTokenService.getUserIdByClaims(token);
 
-        String inviteCode = inviteCodeRequest.getInviteCode();
+        String inviteCode = familyConfirmRequest.getInviteCode();
 
         String userKey = userRepository.findById(userId).get().getUserKey();
-        String withdrawalAccountNo = withdrawalRequest.getWithdrawalAccountNo();
-        Long depositBalance = withdrawalRequest.getDepositBalance();
+        String withdrawalAccountNo = familyConfirmRequest.getWithdrawalAccountNo();
+        Long depositBalance = familyConfirmRequest.getDepositBalance();
 
         String savingsAccountNo = shinhanApiService.createSavingsAccount(userKey, withdrawalAccountNo, depositBalance);
 
@@ -314,7 +313,7 @@ public class FamilyService {
         InvitedUserInfo userInfo = userInfoHashOperations.get(inviteCode, "userInfo");
 
         // redis에서 초대코드를 주식별자로 하는 레코드 삭제 및 userId를 주식별자로 하는 레코드 삭제
-        expiredInvitedStatus(inviteCodeRequest);
+        expiredInvitedStatus(new InviteCodeRequest(inviteCode));
 
         // 패밀리테이블에 들어갈 familyEntity 생성 후 패밀리테이블 저장
         FamilyEntity familyEntity = new FamilyEntity();

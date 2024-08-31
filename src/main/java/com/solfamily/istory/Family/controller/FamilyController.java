@@ -1,7 +1,7 @@
 package com.solfamily.istory.Family.controller;
 
 import com.solfamily.istory.Family.model.InviteCodeRequest;
-import com.solfamily.istory.shinhan.model.WithdrawalRequest;
+import com.solfamily.istory.shinhan.model.familyConfirmRequest;
 import com.solfamily.istory.Family.service.FamilyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -70,11 +70,9 @@ public class FamilyController {
     public ResponseEntity<Map<String, Object>> confirmFamily(
             HttpServletRequest request,
             @RequestBody
-            InviteCodeRequest inviteCodeRequest,
-            @RequestBody
-            WithdrawalRequest withdrawalRequest
+            familyConfirmRequest familyConfirmRequest
     ) {
-        return familyService.confirmFamily(request, inviteCodeRequest, withdrawalRequest);
+        return familyService.confirmFamily(request, familyConfirmRequest);
     }
 
 }
